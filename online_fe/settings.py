@@ -116,19 +116,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'online_fe.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
 # DATABASES = {
-#     'default': dj_database_url.config(
-#         default=config("DATABASE_URL")
-#     )
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
 # }
+
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=config("DATABASE_URL")
+    )
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
