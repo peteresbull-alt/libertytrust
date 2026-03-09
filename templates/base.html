@@ -6,6 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}{{ title }} - Liberty Trust{% endblock %}</title>
 
+    <!-- ===================== FAVICONS ===================== -->
+    <link rel="icon" type="image/x-icon"       href="{% static 'icons/favicon.ico' %}" />
+    <link rel="icon" type="image/png" sizes="16x16"  href="{% static 'icons/favicon-16x16.png' %}" />
+    <link rel="icon" type="image/png" sizes="32x32"  href="{% static 'icons/favicon-32x32.png' %}" />
+    <link rel="apple-touch-icon" sizes="180x180"     href="{% static 'icons/apple-touch-icon.png' %}" />
+    <link rel="manifest"                             href="{% static 'icons/site.webmanifest' %}" />
+    <meta name="theme-color" content="#10b981" />
+    <meta name="msapplication-TileColor" content="#10b981" />
+
+    <!-- ===================== SEO: Core ===================== -->
+    <meta name="description" content="{% block meta_description %}Liberty Trust — secure online wealth management built for modern individuals.{% endblock %}" />
+    <meta name="keywords"    content="{% block meta_keywords %}Liberty Trust, secure transfers, wealth management, financial freedom, personal finance{% endblock %}" />
+    <meta name="robots"      content="index, follow" />
+    <meta name="author"      content="Liberty Trust" />
+    <link rel="canonical"    href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}" />
+
+    <!-- ===================== SEO: Open Graph ===================== -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:site_name"   content="Liberty Trust" />
+    <meta property="og:title"       content="{% block og_title %}{% block title2 %}{{ title }} - Liberty Trust{% endblock %}{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}Secure online  wealth management platform.{% endblock %}" />
+    <meta property="og:image"       content="{% block og_image %}{% static 'icons/android-chrome-512x512.png' %}{% endblock %}" />
+    <meta property="og:url"         content="{{ request.build_absolute_uri }}" />
+
+    <!-- ===================== SEO: Twitter Card ===================== -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:site"        content="@LibertyTrust" />
+    <meta name="twitter:title"       content="{% block tw_title %}{{ title }} - Liberty Trust{% endblock %}" />
+    <meta name="twitter:description" content="{% block tw_description %}Secure online wealth management platform.{% endblock %}" />
+    <meta name="twitter:image"       content="{% block tw_image %}{% static 'icons/android-chrome-512x512.png' %}{% endblock %}" />
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
