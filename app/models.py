@@ -75,8 +75,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50, blank=False)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=False)
-    phone_number = models.CharField(max_length=15, blank=False, db_index=True)
-    alternate_phone = models.CharField(max_length=15, blank=True, null=True)
+    phone_number = models.CharField(max_length=150, blank=False, db_index=True)
+    alternate_phone = models.CharField(max_length=150, blank=True, null=True)
     
     # Unique Identifiers
     bank_id = models.CharField(max_length=10, unique=True, blank=True, null=True, db_index=True)
@@ -122,7 +122,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     job_title = models.CharField(max_length=200, blank=True, null=True)
     job_start_date = models.DateField(blank=True, null=True)
     job_end_date = models.DateField(blank=True, null=True)
-    annual_income = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    annual_income = models.DecimalField(max_digits=120, decimal_places=2, blank=True, null=True)
     
     # Government ID
     government_id_type = models.CharField(max_length=200, choices=PREFERRED_ID_TYPE, blank=True, null=True)
@@ -146,8 +146,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     can_apply_for_loans = models.BooleanField(default=False)
     can_apply_for_cards = models.BooleanField(default=True)
     can_make_transfers = models.BooleanField(default=True)
-    daily_transfer_limit = models.DecimalField(max_digits=12, decimal_places=2, default=10000.00)
-    monthly_transfer_limit = models.DecimalField(max_digits=12, decimal_places=2, default=100000.00)
+    daily_transfer_limit = models.DecimalField(max_digits=120, decimal_places=2, default=10000.00)
+    monthly_transfer_limit = models.DecimalField(max_digits=120, decimal_places=2, default=100000.00)
     
     # KYC Status
     has_submitted_kyc = models.BooleanField(default=False)
@@ -325,30 +325,30 @@ class Account(models.Model):
     
     # Balance (Single balance field - simplified)
     balance = models.DecimalField(
-        max_digits=15, 
+        max_digits=150, 
         decimal_places=2, 
         default=Decimal('0.00'),
         validators=[MinValueValidator(Decimal('0.00'))]
     )
     
     # Account Details
-    ach_routing = models.CharField(max_length=9, blank=True, null=True)
-    swift_code = models.CharField(max_length=11, blank=True, null=True)
-    iban = models.CharField(max_length=34, blank=True, null=True)
+    ach_routing = models.CharField(max_length=100, blank=True, null=True)
+    swift_code = models.CharField(max_length=100, blank=True, null=True)
+    iban = models.CharField(max_length=100, blank=True, null=True)
     bank_name = models.CharField(max_length=200, default="Royal Shore International")
     branch_name = models.CharField(max_length=200, blank=True, null=True)
     branch_code = models.CharField(max_length=10, blank=True, null=True)
     
     # Status & Limits
-    status = models.CharField(max_length=20, choices=ACCOUNT_STATUS, default='PENDING')
+    status = models.CharField(max_length=100, choices=ACCOUNT_STATUS, default='PENDING')
     is_active = models.BooleanField(default=False)
     is_closed = models.BooleanField(default=False)
     is_frozen = models.BooleanField(default=False)
     
-    daily_withdrawal_limit = models.DecimalField(max_digits=12, decimal_places=2, default=5000.00)
-    daily_transfer_limit = models.DecimalField(max_digits=12, decimal_places=2, default=10000.00)
-    minimum_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    overdraft_limit = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    daily_withdrawal_limit = models.DecimalField(max_digits=120, decimal_places=2, default=5000.00)
+    daily_transfer_limit = models.DecimalField(max_digits=120, decimal_places=2, default=10000.00)
+    minimum_balance = models.DecimalField(max_digits=120, decimal_places=2, default=0.00)
+    overdraft_limit = models.DecimalField(max_digits=120, decimal_places=2, default=0.00)
     
     # Interest (for savings accounts)
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
@@ -468,7 +468,7 @@ class Transaction(models.Model):
     
     # Transaction Details
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
-    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    amount = models.DecimalField(max_digits=150, decimal_places=2)
     currency = models.CharField(max_length=3, default='USD')
     fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
@@ -482,8 +482,8 @@ class Transaction(models.Model):
     channel = models.CharField(max_length=20, choices=TRANSACTION_CHANNEL, default='WEB')
     
     # Balance Tracking
-    balance_before = models.DecimalField(max_digits=15, decimal_places=2)
-    balance_after = models.DecimalField(max_digits=15, decimal_places=2)
+    balance_before = models.DecimalField(max_digits=150, decimal_places=2)
+    balance_after = models.DecimalField(max_digits=150, decimal_places=2)
     
     # Description & References
     description = models.TextField(blank=True, null=True)
@@ -598,9 +598,9 @@ class Card(models.Model):
     pin = models.CharField(max_length=200, blank=True, null=True)  # Hashed
     
     # Limits
-    daily_limit = models.DecimalField(max_digits=12, decimal_places=2, default=5000.00)
-    monthly_limit = models.DecimalField(max_digits=12, decimal_places=2, default=50000.00)
-    single_transaction_limit = models.DecimalField(max_digits=12, decimal_places=2, default=1000.00)
+    daily_limit = models.DecimalField(max_digits=120, decimal_places=2, default=5000.00)
+    monthly_limit = models.DecimalField(max_digits=120, decimal_places=2, default=50000.00)
+    single_transaction_limit = models.DecimalField(max_digits=120, decimal_places=2, default=1000.00)
     
     # Status
     status = models.CharField(max_length=20, choices=CARD_STATUS, default='PENDING')
@@ -667,16 +667,16 @@ class Loan(models.Model):
     # Loan Details
     loan_number = models.CharField(max_length=20, unique=True)
     loan_type = models.CharField(max_length=20, choices=LOAN_TYPES)
-    principal_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    principal_amount = models.DecimalField(max_digits=150, decimal_places=2)
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=10.0)
     loan_term_months = models.IntegerField()  # Duration in months
     
     # Calculated Fields
-    monthly_payment = models.DecimalField(max_digits=12, decimal_places=2)
-    total_interest = models.DecimalField(max_digits=15, decimal_places=2)
-    total_amount = models.DecimalField(max_digits=15, decimal_places=2)
-    amount_paid = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-    balance_remaining = models.DecimalField(max_digits=15, decimal_places=2)
+    monthly_payment = models.DecimalField(max_digits=120, decimal_places=2)
+    total_interest = models.DecimalField(max_digits=150, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=150, decimal_places=2)
+    amount_paid = models.DecimalField(max_digits=150, decimal_places=2, default=0.00)
+    balance_remaining = models.DecimalField(max_digits=150, decimal_places=2)
     
     # Dates
     application_date = models.DateTimeField(auto_now_add=True)
@@ -697,7 +697,7 @@ class Loan(models.Model):
     
     # Collateral
     collateral_description = models.TextField(blank=True, null=True)
-    collateral_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    collateral_value = models.DecimalField(max_digits=150, decimal_places=2, blank=True, null=True)
     
     class Meta:
         verbose_name = "Loan"
@@ -719,8 +719,8 @@ class LoanRepayment(models.Model):
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE, related_name='repayments')
     payment_number = models.IntegerField()  # 1st, 2nd, 3rd payment
     due_date = models.DateField()
-    amount_due = models.DecimalField(max_digits=12, decimal_places=2)
-    amount_paid = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    amount_due = models.DecimalField(max_digits=120, decimal_places=2)
+    amount_paid = models.DecimalField(max_digits=120, decimal_places=2, default=0.00)
     paid_date = models.DateField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
     is_overdue = models.BooleanField(default=False)
@@ -921,7 +921,7 @@ class ExchangeRate(models.Model):
     """
     from_currency = models.CharField(max_length=3)
     to_currency = models.CharField(max_length=3)
-    rate = models.DecimalField(max_digits=12, decimal_places=6)
+    rate = models.DecimalField(max_digits=120, decimal_places=6)
     effective_date = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -946,13 +946,13 @@ class TransactionLimit(models.Model):
     date = models.DateField(default=timezone.now)
     
     daily_transfer_count = models.IntegerField(default=0)
-    daily_transfer_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    daily_transfer_amount = models.DecimalField(max_digits=150, decimal_places=2, default=0.00)
     
     daily_withdrawal_count = models.IntegerField(default=0)
-    daily_withdrawal_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    daily_withdrawal_amount = models.DecimalField(max_digits=150, decimal_places=2, default=0.00)
     
-    monthly_transfer_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-    monthly_withdrawal_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    monthly_transfer_amount = models.DecimalField(max_digits=150, decimal_places=2, default=0.00)
+    monthly_withdrawal_amount = models.DecimalField(max_digits=150, decimal_places=2, default=0.00)
     
     class Meta:
         verbose_name = "Transaction Limit"
