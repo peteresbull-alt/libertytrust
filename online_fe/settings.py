@@ -321,7 +321,7 @@ X_FRAME_OPTIONS = 'DENY'
 # APPLICATION SETTINGS
 # ============================================
 
-APP_NAME = 'Online Bank'
+APP_NAME = 'Online FE'
 FRONTEND_URL = 'http://localhost:3000'
 
 

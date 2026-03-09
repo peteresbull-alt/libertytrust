@@ -1419,7 +1419,7 @@ def generate_routing_number():
 
 def generate_swift_code():
     """Generate SWIFT code"""
-    return 'ROYALINTBNK' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
+    return 'ROYALINT' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
 
 
 def generate_card_number():
