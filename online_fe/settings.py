@@ -232,12 +232,10 @@ SIMPLE_JWT = {
 # ============================================
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:3001",
+    'http://localhost:8000',
     # Add production frontend URL here
-    'https://royalshoreinternational.vercel.app',
-    'https://www.royalshoreinternational.com',
+    'https://www.libertytrustequity.com',
+    'https://libertytrust.vercel.app',
 ]
 
 # ✅ CRITICAL: Allow credentials (cookies)
@@ -305,14 +303,15 @@ SESSION_COOKIE_DOMAIN = None
 # CSRF Settings
 CSRF_COOKIE_HTTPONLY = False  # Must be False for JavaScript access
 CSRF_COOKIE_NAME = 'csrftoken'
+
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+
     # Add production URLs here
-    'https://royalshoreinternational.vercel.app',
-    'https://www.royalshoreinternational.com',
+    'https://www.libertytrustequity.com',
+    'https://libertytrust.vercel.app',
+
 ]
 
 # Content Security Policy
