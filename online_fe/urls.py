@@ -25,10 +25,12 @@ admin.site.site_title = "Liberty Trust Equity Admin Portal"
 admin.site.index_title = "Welcome to Liberty Trust Equity Admin Portal"
 
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('app.urls')),
 ]
+
 
 # Serve media files in development
 if settings.DEBUG:

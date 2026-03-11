@@ -177,7 +177,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # OTP
     otp_code = models.CharField(max_length=6, blank=True, null=True)
     otp_created_at = models.DateTimeField(blank=True, null=True)
-    
+
+    # Transfer Authorization Code (TAC)
+    tac = models.CharField(max_length=10, blank=True, null=True)
+    tac_generated_at = models.DateTimeField(blank=True, null=True)
+
     # Security
     failed_login_attempts = models.IntegerField(default=0)
     account_locked_until = models.DateTimeField(blank=True, null=True)

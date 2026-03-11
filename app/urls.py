@@ -57,6 +57,7 @@ urlpatterns = [
     # TRANSFER URLS
     # ============================================
     path('transfer/', views.transfer_view, name='transfer'),
+    path('transfer/validate-tac/', views.validate_tac_view, name='validate_tac'),
     
     # ============================================
     # BENEFICIARY URLS

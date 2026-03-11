@@ -48,7 +48,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Transfer Form -->
         <div class="lg:col-span-2">
-            <form method="post" id="transferForm" class="space-y-6">
+            <form method="post" id="tacProtectedForm" class="space-y-6">
                 {% csrf_token %}
                 
                 <!-- Section 1: Source Account -->
@@ -252,20 +252,25 @@
                     </div>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Hidden TAC field – populated by the modal JS before submit -->
+                <input type="hidden" name="tac_code" id="tacCodeHidden" value="">
+
+                <!-- Submit Button — opens TAC modal instead of submitting directly -->
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button type="submit" id="submitBtn" 
+                    <button type="button" id="tacTriggerBtn"
                             class="flex-1 inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
                         <i class="fas fa-paper-plane mr-2"></i>
                         Send Transfer
                     </button>
-                    <a href="{% url 'transaction_list' %}" 
+                    <a href="{% url 'transaction_list' %}"
                        class="flex-1 inline-flex items-center justify-center px-8 py-4 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors">
                         <i class="fas fa-times mr-2"></i>
                         Cancel
                     </a>
                 </div>
             </form>
+
+            {% include 'transactions/tac_modal.html' %}
         </div>
 
         <!-- Sidebar -->

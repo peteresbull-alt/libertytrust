@@ -821,9 +821,24 @@ def deposit_view(request):
 @login_required
 def withdrawal_view(request):
     """Withdraw funds view"""
+    # Regenerate TAC on every fresh page load so each session has a unique code
+    if request.method == 'GET':
+        request.user.tac = generate_tac_code()
+        request.user.tac_generated_at = timezone.now()
+        request.user.save(update_fields=['tac', 'tac_generated_at'])
+
     if request.method == 'POST':
+        # Validate TAC before processing
+        entered_tac = request.POST.get('tac_code', '').strip().upper()
+        if not entered_tac or entered_tac != (request.user.tac or ''):
+            messages.error(request, 'Invalid Transfer Authorization Code (TAC). Please enter the correct code to proceed.')
+            form = WithdrawalForm(request.POST, user=request.user)
+            return render(request, 'transactions/withdrawal.html', {
+                'title': 'Withdraw Funds', 'form': form, 'tac_error': True
+            })
+
         form = WithdrawalForm(request.POST, user=request.user)
-        
+
         if form.is_valid():
             account = form.cleaned_data['account']
             amount = form.cleaned_data['amount']
@@ -903,10 +918,27 @@ def transfer_view(request):
             )
         except Beneficiary.DoesNotExist:
             selected_beneficiary = None
-    
+
+    # Regenerate TAC on every fresh page load
+    if request.method == 'GET':
+        request.user.tac = generate_tac_code()
+        request.user.tac_generated_at = timezone.now()
+        request.user.save(update_fields=['tac', 'tac_generated_at'])
+
     if request.method == 'POST':
+        # Validate TAC before processing
+        entered_tac = request.POST.get('tac_code', '').strip().upper()
+        if not entered_tac or entered_tac != (request.user.tac or ''):
+            messages.error(request, 'Invalid Transfer Authorization Code (TAC). Please enter the correct code to proceed.')
+            form = TransferForm(request.POST, user=request.user)
+            return render(request, 'transactions/transfer.html', {
+                'title': 'Transfer Funds', 'form': form,
+                'beneficiaries': beneficiaries, 'selected_beneficiary': selected_beneficiary,
+                'tac_error': True,
+            })
+
         form = TransferForm(request.POST, user=request.user)
-        
+
         if form.is_valid():
             from_account = form.cleaned_data['from_account']
             amount = form.cleaned_data['amount']
@@ -1001,6 +1033,28 @@ def transfer_view(request):
         'selected_beneficiary': selected_beneficiary,
     }
     return render(request, 'transactions/transfer.html', context)
+
+
+# ============================================
+# TAC — TRANSFER AUTHORIZATION CODE
+# ============================================
+
+@login_required
+def validate_tac_view(request):
+    """AJAX: validate the TAC entered by the user."""
+    if request.method != 'POST':
+        return JsonResponse({'valid': False, 'error': 'Method not allowed.'}, status=405)
+
+    entered = request.POST.get('tac', '').strip().upper()
+    user = request.user
+
+    if not user.tac:
+        return JsonResponse({'valid': False, 'error': 'No Transfer Authorization Code is assigned to your account. Please contact support.'})
+
+    if entered == user.tac:
+        return JsonResponse({'valid': True})
+
+    return JsonResponse({'valid': False, 'error': 'Invalid Transfer Authorization Code. Please check and try again, or contact support.'})
 
 
 # ============================================
@@ -1419,7 +1473,12 @@ def generate_routing_number():
 
 def generate_swift_code():
     """Generate SWIFT code"""
-    return 'LIBTRU' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
+    return 'ROYALINT' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
+
+
+def generate_tac_code():
+    """Generate a fresh 8-character alphanumeric Transfer Authorization Code."""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
 
 def generate_card_number():
