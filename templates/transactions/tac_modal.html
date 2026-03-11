@@ -289,6 +289,15 @@
   }
 
   /* ---------- main action ---------- */
+  function getCsrfToken() {
+    const name = 'csrftoken';
+    for (let c of document.cookie.split(';')) {
+      c = c.trim();
+      if (c.startsWith(name + '=')) return decodeURIComponent(c.slice(name.length + 1));
+    }
+    return '';
+  }
+
   function tacProceed() {
     const code = document.getElementById('tacInputField').value.trim();
     if (!code) { tacShowError('Please enter your Transfer Authorization Code.'); return; }
@@ -300,7 +309,7 @@
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'X-CSRFToken': '{{ csrf_token }}',
+        'X-CSRFToken': getCsrfToken(),
       },
       body: 'tac=' + encodeURIComponent(code),
     })
@@ -327,6 +336,12 @@
     if (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
+        const form = document.getElementById('tacProtectedForm');
+        // Let the browser highlight all missing/invalid fields first
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
         tacOpen();
       });
     }
