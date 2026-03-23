@@ -288,7 +288,7 @@ def deposit_view(request):
         )
     
     # Check if account is active
-    if not account.is_active or account.is_frozen or account.is_closed:
+    if account.status != 'ACTIVE':
         return Response(
             {'error': 'Account is not active or is frozen/closed'},
             status=status.HTTP_400_BAD_REQUEST
@@ -364,7 +364,7 @@ def withdrawal_view(request):
         )
     
     # Check if account is active
-    if not account.is_active or account.is_frozen or account.is_closed:
+    if account.status != 'ACTIVE':
         return Response(
             {'error': 'Account is not active or is frozen/closed'},
             status=status.HTTP_400_BAD_REQUEST
@@ -489,7 +489,7 @@ def transfer_view(request):
         )
     
     # Check if account is active
-    if not from_account.is_active or from_account.is_frozen or from_account.is_closed:
+    if from_account.status != 'ACTIVE':
         return Response(
             {'error': 'Source account is not active or is frozen/closed'},
             status=status.HTTP_400_BAD_REQUEST
@@ -1192,7 +1192,7 @@ def dashboard_summary_view(request):
     
     # Get accounts summary
     accounts = Account.objects.filter(customer=user)
-    total_balance = sum(acc.balance for acc in accounts if acc.is_active)
+    total_balance = sum(acc.balance for acc in accounts if acc.status == 'ACTIVE')
     
     # Get recent transactions
     recent_transactions = Transaction.objects.filter(
@@ -1227,7 +1227,7 @@ def dashboard_summary_view(request):
         },
         'accounts': {
             'total_count': accounts.count(),
-            'active_count': accounts.filter(is_active=True).count(),
+            'active_count': accounts.filter(status='ACTIVE').count(),
             'total_balance': str(total_balance),
         },
         'transactions': {

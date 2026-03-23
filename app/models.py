@@ -257,10 +257,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     @property
     def get_total_balance(self):
-        """Calculate total balance across all accounts"""
+        """Calculate total balance across all ACTIVE accounts"""
         return self.accounts.filter(
-            is_active=True,
-            is_closed=False
+            status='ACTIVE'
         ).aggregate(
             total=models.Sum('balance')
         )['total'] or Decimal('0.00')
@@ -339,15 +338,12 @@ class Account(models.Model):
     ach_routing = models.CharField(max_length=100, blank=True, null=True)
     swift_code = models.CharField(max_length=100, blank=True, null=True)
     iban = models.CharField(max_length=100, blank=True, null=True)
-    bank_name = models.CharField(max_length=200, default="Royal Shore International")
+    bank_name = models.CharField(max_length=200, default="Liberty Trust Equity")
     branch_name = models.CharField(max_length=200, blank=True, null=True)
     branch_code = models.CharField(max_length=10, blank=True, null=True)
     
     # Status & Limits
     status = models.CharField(max_length=100, choices=ACCOUNT_STATUS, default='PENDING')
-    is_active = models.BooleanField(default=False)
-    is_closed = models.BooleanField(default=False)
-    is_frozen = models.BooleanField(default=False)
     
     daily_withdrawal_limit = models.DecimalField(max_digits=120, decimal_places=2, default=5000.00)
     daily_transfer_limit = models.DecimalField(max_digits=120, decimal_places=2, default=10000.00)
@@ -395,19 +391,9 @@ class Account(models.Model):
     def __str__(self):
         return f"{self.customer.email} - {self.account_type} ({self.account_number})"
     
-    @property
-    def get_total_balance(self):
-        """Calculate total balance across all active accounts"""
-        return self.accounts.filter(
-            is_active=True,
-            is_closed=False
-        ).aggregate(
-            total=models.Sum('balance')
-        )['total'] or Decimal('0.00')
-    
     def can_debit(self, amount):
         """Check if account can be debited"""
-        if not self.is_active or self.is_frozen or self.is_closed:
+        if self.status != 'ACTIVE':
             return False
         return self.balance >= amount
     
@@ -421,7 +407,7 @@ class Account(models.Model):
     
     def credit(self, amount):
         """Credit amount to account"""
-        if not self.is_active or self.is_frozen or self.is_closed:
+        if self.status != 'ACTIVE':
             return False
         self.balance += amount
         self.save()

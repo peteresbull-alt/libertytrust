@@ -342,6 +342,13 @@
           form.reportValidity();
           return;
         }
+        // Check account status before opening TAC modal
+        const acctStatus = (typeof getSelectedAccountStatus === 'function')
+          ? getSelectedAccountStatus() : null;
+        if (acctStatus && acctStatus !== 'ACTIVE') {
+          arOpen(acctStatus);
+          return;
+        }
         tacOpen();
       });
     }

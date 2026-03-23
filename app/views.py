@@ -297,8 +297,7 @@ def dashboard_view(request):
     
     # Get user's accounts (only non-closed)
     accounts = Account.objects.filter(
-        customer=user,
-        is_closed=False
+        customer=user
     ).order_by('-created_at')
     
     # Get user's cards
@@ -320,7 +319,7 @@ def dashboard_view(request):
     
     # Calculate total balance across all ACTIVE accounts
     total_balance = accounts.filter(
-        is_active=True
+        status='ACTIVE'
     ).aggregate(
         total=Sum('balance')
     )['total'] or Decimal('0.00')
@@ -348,7 +347,7 @@ def dashboard_view(request):
     ).count()
     
     # Count of active accounts
-    active_accounts_count = accounts.filter(is_active=True).count()
+    active_accounts_count = accounts.filter(status='ACTIVE').count()
     
     context = {
         'title': 'Dashboard',
@@ -424,7 +423,6 @@ def account_apply_view(request):
             
             # Set default values
             account.status = 'PENDING'
-            account.is_active = False
             account.bank_name = "Royal Shore International"
             
             # Generate routing numbers
@@ -810,9 +808,15 @@ def deposit_view(request):
     else:
         form = DepositForm(user=request.user)
     
+    account_statuses = {
+        str(acc.id): acc.status
+        for acc in Account.objects.filter(customer=request.user)
+    }
+
     context = {
         'title': 'Deposit Funds',
-        'form': form
+        'form': form,
+        'account_statuses': account_statuses,
     }
     return render(request, 'transactions/deposit.html', context)
 
@@ -886,9 +890,16 @@ def withdrawal_view(request):
     else:
         form = WithdrawalForm(user=request.user)
     
+    # Build a status map so the client can check account status before the TAC modal
+    account_statuses = {
+        str(acc.id): acc.status
+        for acc in Account.objects.filter(customer=request.user)
+    }
+
     context = {
         'title': 'Withdraw Funds',
-        'form': form
+        'form': form,
+        'account_statuses': account_statuses,
     }
     return render(request, 'transactions/withdrawal.html', context)
 
@@ -1026,11 +1037,18 @@ def transfer_view(request):
         
         form = TransferForm(user=request.user, initial=initial_data)
     
+    # Build a status map so the client can check account status before the TAC modal
+    account_statuses = {
+        str(acc.id): acc.status
+        for acc in Account.objects.filter(customer=request.user)
+    }
+
     context = {
         'title': 'Transfer Funds',
         'form': form,
         'beneficiaries': beneficiaries,
         'selected_beneficiary': selected_beneficiary,
+        'account_statuses': account_statuses,
     }
     return render(request, 'transactions/transfer.html', context)
 
@@ -1473,7 +1491,7 @@ def generate_routing_number():
 
 def generate_swift_code():
     """Generate SWIFT code"""
-    return 'ROYALINT' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
+    return 'LIBTRUST' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=3))
 
 
 def generate_tac_code():

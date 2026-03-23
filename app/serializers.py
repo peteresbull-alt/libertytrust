@@ -61,7 +61,7 @@ class AccountListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'account_number', 'masked_account_number', 'account_name',
             'account_type', 'currency', 'balance', 'available_balance',
-            'status', 'is_active', 'customer_name', 'bank_name',
+            'status', 'customer_name', 'bank_name',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'account_number', 'balance', 'available_balance']
@@ -85,7 +85,7 @@ class AccountDetailSerializer(serializers.ModelSerializer):
             'id', 'account_number', 'account_name', 'account_type', 'currency',
             'balance', 'available_balance', 'pending_balance',
             'ach_routing', 'swift_code', 'iban', 'bank_name', 'branch_name',
-            'status', 'is_active', 'is_closed', 'is_frozen',
+            'status',
             'daily_withdrawal_limit', 'daily_transfer_limit', 'minimum_balance',
             'overdraft_limit', 'interest_rate', 'last_interest_calculated',
             'is_joint_account', 'joint_holder_names', 'activation_fee',
@@ -132,8 +132,6 @@ class AccountCreateSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         validated_data['customer'] = user
         validated_data['status'] = 'PENDING'
-        validated_data['is_active'] = False
-        
         return super().create(validated_data)
 
 
@@ -366,7 +364,7 @@ class CardCreateSerializer(serializers.ModelSerializer):
             account = Account.objects.get(
                 account_number=account_number,
                 customer=user,
-                is_active=True
+                status='ACTIVE'
             )
             data['account'] = account
         except Account.DoesNotExist:
@@ -450,7 +448,7 @@ class LoanApplicationSerializer(serializers.ModelSerializer):
             account = Account.objects.get(
                 account_number=account_number,
                 customer=user,
-                is_active=True
+                status='ACTIVE'
             )
             data['account'] = account
         except Account.DoesNotExist:

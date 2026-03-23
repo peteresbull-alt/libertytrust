@@ -396,9 +396,8 @@ class AccountApplicationForm(forms.ModelForm):
             
             # Check if user already has too many accounts
             active_accounts = Account.objects.filter(
-                customer=self.user,
-                is_closed=False
-            ).count()
+                customer=self.user
+            ).exclude(status='CLOSED').count()
             
             if active_accounts >= 5:
                 raise ValidationError(
@@ -412,8 +411,7 @@ class AccountApplicationForm(forms.ModelForm):
                 existing = Account.objects.filter(
                     customer=self.user,
                     account_type=account_type,
-                    is_closed=False
-                ).exists()
+                ).exclude(status='CLOSED').exists()
                 
                 if existing:
                     raise ValidationError(
@@ -486,12 +484,11 @@ class CardApplicationForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        # Filter accounts to only show user's active accounts
+        # Filter accounts to only show user's active accounts (for card application)
         if self.user:
             self.fields['account'].queryset = Account.objects.filter(
                 customer=self.user,
-                is_active=True,
-                is_closed=False
+                status='ACTIVE'
             )
     
     def clean(self):
@@ -651,11 +648,10 @@ class DepositForm(forms.Form):
         super().__init__(*args, **kwargs)
         
         if self.user:
+            # Show all accounts except PENDING so the status-gate modal can inform the user
             self.fields['account'].queryset = Account.objects.filter(
                 customer=self.user,
-                is_active=True,
-                is_closed=False
-            )
+            ).exclude(status='PENDING')
 
 
 
@@ -709,12 +705,11 @@ class WithdrawalForm(forms.Form):
         super().__init__(*args, **kwargs)
         
         if self.user:
+            # Show all accounts except PENDING so the status-gate modal can inform the user
             self.fields['account'].queryset = Account.objects.filter(
                 customer=self.user,
-                is_active=True,
-                is_closed=False
-            )
-    
+            ).exclude(status='PENDING')
+
     def clean(self):
         cleaned_data = super().clean()
         account = cleaned_data.get('account')
@@ -838,11 +833,10 @@ class TransferForm(forms.Form):
         super().__init__(*args, **kwargs)
         
         if self.user:
+            # Show all accounts except PENDING so the status-gate modal can inform the user
             self.fields['from_account'].queryset = Account.objects.filter(
                 customer=self.user,
-                is_active=True,
-                is_closed=False
-            )
+            ).exclude(status='PENDING')
             self.fields['beneficiary'].queryset = Beneficiary.objects.filter(
                 user=self.user
             ).order_by('-is_favorite', 'nickname')
