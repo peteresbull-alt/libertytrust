@@ -318,9 +318,7 @@ def dashboard_view(request):
     ).order_by('-created_at')[:5]
     
     # Calculate total balance across all ACTIVE accounts
-    total_balance = accounts.filter(
-        status='ACTIVE'
-    ).aggregate(
+    total_balance = accounts.all().aggregate(
         total=Sum('balance')
     )['total'] or Decimal('0.00')
     
