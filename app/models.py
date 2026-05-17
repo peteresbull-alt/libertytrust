@@ -951,6 +951,82 @@ class TransactionLimit(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.date}"
-    
+
+
+# ============================================
+# DEPOSIT DETAILS MODEL
+# ============================================
+
+class DepositDetails(models.Model):
+    PAYMENT_METHOD_CHOICES = [
+        ('BANK_TRANSFER', 'Bank Transfer'),
+        ('PAYPAL', 'PayPal'),
+        ('CRYPTO', 'Cryptocurrency'),
+        ('CASHAPP', 'CashApp'),
+    ]
+
+    CRYPTO_CURRENCY_CHOICES = [
+        ('BTC', 'Bitcoin (BTC)'),
+        ('ETH', 'Ethereum (ETH)'),
+        ('USDT', 'Tether (USDT)'),
+        ('USDC', 'USD Coin (USDC)'),
+        ('BNB', 'Binance Coin (BNB)'),
+        ('XRP', 'Ripple (XRP)'),
+        ('LTC', 'Litecoin (LTC)'),
+        ('SOL', 'Solana (SOL)'),
+    ]
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='deposit_details',
+        help_text='The admin/owner of these payment details.',
+    )
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
+    label = models.CharField(
+        max_length=100,
+        help_text='A short label to identify this entry, e.g. "Chase Bank" or "USDT Wallet".',
+    )
+    is_active = models.BooleanField(default=True)
+
+    # ── Bank Transfer ──────────────────────────────
+    bank_name = models.CharField(max_length=200, blank=True)
+    account_name = models.CharField(max_length=200, blank=True)
+    account_number = models.CharField(max_length=50, blank=True)
+    routing_number = models.CharField(max_length=50, blank=True)
+    swift_code = models.CharField(max_length=20, blank=True, verbose_name='SWIFT / BIC')
+    iban = models.CharField(max_length=50, blank=True, verbose_name='IBAN')
+    bank_address = models.TextField(blank=True)
+
+    # ── PayPal ─────────────────────────────────────
+    paypal_email = models.EmailField(blank=True)
+
+    # ── Cryptocurrency ────────────────────────────
+    crypto_currency = models.CharField(
+        max_length=10, choices=CRYPTO_CURRENCY_CHOICES, blank=True,
+        verbose_name='Crypto Currency',
+    )
+    crypto_network = models.CharField(
+        max_length=100, blank=True,
+        help_text='e.g. ERC-20, TRC-20, BEP-20',
+        verbose_name='Network',
+    )
+    crypto_address = models.CharField(max_length=200, blank=True, verbose_name='Wallet Address')
+
+    # ── CashApp ───────────────────────────────────
+    cashapp_cashtag = models.CharField(max_length=100, blank=True, verbose_name='$Cashtag')
+    cashapp_name = models.CharField(max_length=200, blank=True, verbose_name='CashApp Name')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Deposit Detail'
+        verbose_name_plural = 'Deposit Details'
+        ordering = ['payment_method', 'label']
+
+    def __str__(self):
+        return f"{self.get_payment_method_display()} — {self.label} ({self.user.email})"
+
 
     

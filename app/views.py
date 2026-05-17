@@ -13,17 +13,18 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 import random
 import string
+import json
 
 from .models import (
     CustomUser, Account, Card, Transaction, Beneficiary,
-    SupportTicket, Notification, AuditLog, TransactionLimit
+    SupportTicket, Notification, AuditLog, TransactionLimit, DepositDetails
 )
 from .forms import (
     UserRegistrationForm, UserLoginForm, OTPVerificationForm,
     ProfileUpdateForm, EmploymentInformationForm, KYCDocumentForm,
     ChangePasswordForm, AccountApplicationForm, AccountActivationForm,
     CardApplicationForm, CardActivationForm, CardPINForm,
-    DepositForm, WithdrawalForm, TransferForm, BeneficiaryForm,
+    WithdrawalForm, TransferForm, BeneficiaryForm,
     SupportTicketForm, NotificationPreferencesForm
 )
 
@@ -751,22 +752,39 @@ def transaction_detail_view(request, transaction_id):
 
 @login_required
 def deposit_view(request):
-    """Deposit funds view"""
+    """Deposit funds view — modal-based payment details flow."""
     if request.method == 'POST':
-        form = DepositForm(request.POST, request.FILES, user=request.user)
-        
-        if form.is_valid():
-            account = form.cleaned_data['account']
-            amount = form.cleaned_data['amount']
-            payment_method = form.cleaned_data['payment_method']
-            reference_number = form.cleaned_data.get('reference_number')
-            description = form.cleaned_data.get('description')
-            receipt = request.FILES.get('receipt')
-            
-            # Store balance before transaction
+        amount_str = request.POST.get('amount', '').strip()
+        payment_method = request.POST.get('payment_method', '').strip()
+        reference_number = request.POST.get('reference_number', '').strip() or None
+        receipt = request.FILES.get('receipt')
+
+        valid_methods = ['BANK_TRANSFER', 'PAYPAL', 'CRYPTO', 'CASHAPP']
+        error = None
+        account = None
+        amount = None
+
+        if payment_method not in valid_methods:
+            error = 'Invalid payment method.'
+
+        if not error:
+            try:
+                amount = Decimal(amount_str)
+                if amount <= 0:
+                    error = 'Amount must be greater than zero.'
+            except Exception:
+                error = 'Please enter a valid amount.'
+
+        if not error and not receipt:
+            error = 'Please upload a receipt or screenshot of your payment.'
+
+        if not error:
+            account = Account.objects.filter(customer=request.user, status='ACTIVE').first()
+            if not account:
+                error = 'You need at least one active account to make a deposit. Please contact support.'
+
+        if not error and account and amount:
             balance_before = account.balance
-            
-            # Create transaction (status PENDING - balance not affected yet)
             transaction = Transaction.objects.create(
                 transaction_id=generate_transaction_id(),
                 user=request.user,
@@ -777,44 +795,77 @@ def deposit_view(request):
                 status='PENDING',
                 channel='WEB',
                 balance_before=balance_before,
-                balance_after=balance_before,  # Will be updated when approved
-                description=description or f'{payment_method} Deposit',
+                balance_after=balance_before,
+                description=f'{payment_method.replace("_", " ").title()} Deposit',
                 reference_number=reference_number,
-                receipt=receipt,
                 ip_address=get_client_ip(request),
-                user_agent=request.META.get('HTTP_USER_AGENT', '')
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
             )
-            
-            # Create notification
             Notification.objects.create(
                 user=request.user,
                 notification_type='TRANSACTION',
                 priority='MEDIUM',
                 title='Deposit Request Submitted',
-                message=f'Your deposit request of {amount} {account.currency} has been submitted and is pending approval.',
-                transaction=transaction
+                message=(
+                    f'Your deposit request of {amount} {account.currency} has been '
+                    'submitted and is pending approval.'
+                ),
+                transaction=transaction,
             )
-            
             messages.success(
                 request,
-                f'Deposit request of {amount} {account.currency} submitted successfully! '
-                'Your account will be credited once the deposit is verified.'
+                f'Deposit of {amount} {account.currency} submitted! '
+                'Your account will be credited after verification.',
             )
             return redirect('transaction_detail', transaction_id=transaction.transaction_id)
         else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = DepositForm(user=request.user)
-    
+            messages.error(request, error or 'Please correct the errors and try again.')
+
+    # ── GET: build deposit details grouped by payment method ──────────
+    accounts = Account.objects.filter(customer=request.user).exclude(status='PENDING')
     account_statuses = {
         str(acc.id): acc.status
         for acc in Account.objects.filter(customer=request.user)
     }
 
+    details_by_method = {}
+    for detail in DepositDetails.objects.filter(is_active=True):
+        method = detail.payment_method
+        if method not in details_by_method:
+            details_by_method[method] = []
+
+        entry = {'id': detail.id, 'label': detail.label}
+        if method == 'BANK_TRANSFER':
+            entry.update({
+                'bank_name': detail.bank_name,
+                'account_name': detail.account_name,
+                'account_number': detail.account_number,
+                'routing_number': detail.routing_number,
+                'swift_code': detail.swift_code,
+                'iban': detail.iban,
+                'bank_address': detail.bank_address,
+            })
+        elif method == 'PAYPAL':
+            entry['paypal_email'] = detail.paypal_email
+        elif method == 'CRYPTO':
+            entry.update({
+                'crypto_currency': detail.crypto_currency,
+                'crypto_network': detail.crypto_network,
+                'crypto_address': detail.crypto_address,
+            })
+        elif method == 'CASHAPP':
+            entry.update({
+                'cashapp_cashtag': detail.cashapp_cashtag,
+                'cashapp_name': detail.cashapp_name,
+            })
+        details_by_method[method].append(entry)
+
     context = {
         'title': 'Deposit Funds',
-        'form': form,
+        'accounts': accounts,
         'account_statuses': account_statuses,
+        'details_by_method': json.dumps(details_by_method),
+        'available_methods': list(details_by_method.keys()),
     }
     return render(request, 'transactions/deposit.html', context)
 

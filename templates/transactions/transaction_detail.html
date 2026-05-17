@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load currency_filters %}
+{% load currency_filters static %}
 {% block page_title %}Transaction Details{% endblock %}
 {% block page_description %}{{ transaction.transaction_id }}{% endblock %}
 
@@ -155,17 +155,52 @@
     <!-- Receipt -->
     {% if transaction.receipt %}
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Attached Receipt</h2>
-        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-            <i class="fas fa-file-pdf text-blue-600 text-3xl"></i>
-            <div class="flex-1">
-                <p class="text-sm font-semibold text-gray-900">Payment Receipt</p>
-                <p class="text-xs text-gray-500">{{ transaction.receipt.name }}</p>
-            </div>
-            <a href="{{ transaction.receipt.url }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
-                <i class="fas fa-download mr-2"></i>Download
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-image text-green-500"></i>
+                Payment Receipt
+            </h2>
+            <a href="{{ transaction.receipt.url }}" target="_blank"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-lg hover:bg-gray-700 transition-colors">
+                <i class="fas fa-external-link-alt text-xs"></i>
+                View Full Size
             </a>
         </div>
+
+        <!-- Image preview (falls back to file row if not an image) -->
+        <div id="receiptImgWrap" class="rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+            <img src="{{ transaction.receipt.url }}"
+                 alt="Payment Receipt"
+                 id="receiptImg"
+                 class="w-full max-h-80 object-contain bg-gray-100 cursor-zoom-in"
+                 onclick="document.getElementById('receiptLightbox').classList.remove('hidden')"
+                 onerror="this.closest('#receiptImgWrap').style.display='none';document.getElementById('receiptFileFallback').classList.remove('hidden');">
+        </div>
+
+        <!-- Non-image fallback -->
+        <div id="receiptFileFallback" class="hidden flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 mt-2">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900">Payment Receipt</p>
+                <p class="text-xs text-gray-500 truncate">{{ transaction.receipt.name }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="receiptLightbox"
+         class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4"
+         style="background:rgba(0,0,0,0.90);backdrop-filter:blur(6px);"
+         onclick="this.classList.add('hidden')">
+        <img src="{{ transaction.receipt.url }}"
+             alt="Payment Receipt"
+             class="max-w-full max-h-full rounded-xl shadow-2xl object-contain"
+             style="max-height:90vh;">
+        <button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
     {% endif %}
 
@@ -219,7 +254,7 @@
 
     <!-- Actions -->
     <div class="flex flex-wrap gap-3">
-        <button onclick="window.print()" class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+        <button onclick="printReceipt()" class="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
             <i class="fas fa-print mr-2"></i>Print Receipt
         </button>
         {% if transaction.status == 'PENDING' %}
@@ -229,4 +264,555 @@
         {% endif %}
     </div>
 </div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     PRINT RECEIPT  –  hidden on screen, sole visible element on print
+══════════════════════════════════════════════════════════════════ -->
+<div id="printReceipt" aria-hidden="true">
+<div class="rp">
+
+    <!-- ── Diagonal watermark ── -->
+    <div class="rp-wm">VERIFIED</div>
+
+    <!-- ════════════ HEADER ════════════ -->
+    <div class="rp-hdr">
+        <!-- Brand -->
+        <div class="rp-hdr-brand">
+            <div class="rp-logo-wrap">
+                <img src="{% static 'images/LibertyTrust.png' %}" alt="Liberty Trust Equity" class="rp-logo-img">
+                <div class="rp-bank-sub">Private Banking &amp; Wealth Management</div>
+            </div>
+        </div>
+        <!-- Doc info -->
+        <div class="rp-hdr-meta">
+            <div class="rp-meta-label">TRANSACTION CONFIRMATION</div>
+            <div class="rp-meta-id">{{ transaction.transaction_id }}</div>
+            <div class="rp-meta-date">Issued {{ transaction.initiated_at|date:"F d, Y" }}</div>
+        </div>
+    </div>
+
+    <!-- ── Tri-color accent ── -->
+    <div class="rp-accent">
+        <div class="rp-accent-dark"></div>
+        <div class="rp-accent-mid"></div>
+        <div class="rp-accent-light"></div>
+    </div>
+
+    <!-- ════════════ HERO AMOUNT ════════════ -->
+    <div class="rp-hero">
+        <div class="rp-hero-eyebrow">{{ transaction.get_transaction_type_display|upper }}</div>
+        <div class="rp-hero-row">
+            {% if transaction.transaction_type == 'DEPOSIT' %}
+            <span class="rp-sign rp-sign-pos">+</span>
+            {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}
+            <span class="rp-sign rp-sign-neg">&minus;</span>
+            {% endif %}
+            <span class="rp-amount">{{ transaction.amount|currency }}</span>
+            <span class="rp-ccy">{{ transaction.currency }}</span>
+        </div>
+        <div class="rp-status-pill rp-pill-{{ transaction.status|lower }}">
+            <span class="rp-pill-dot"></span>{{ transaction.get_status_display }}
+        </div>
+    </div>
+
+    <!-- ── Section label ── -->
+    <div class="rp-divider-label">
+        <span class="rp-divider-line"></span>
+        <span class="rp-divider-text">Transaction Details</span>
+        <span class="rp-divider-line"></span>
+    </div>
+
+    <!-- ════════════ TWO-COLUMN DETAIL GRID ════════════ -->
+    <div class="rp-grid">
+
+        <!-- Left column -->
+        <div class="rp-col rp-col-l">
+
+            <!-- Account -->
+            <div class="rp-card">
+                <div class="rp-card-hdr">Account Information</div>
+                <div class="rp-row"><span class="rp-rl">Account Holder</span><span class="rp-rv">{{ transaction.user.get_full_name|default:transaction.user.email }}</span></div>
+                <div class="rp-row"><span class="rp-rl">Account Number</span><span class="rp-rv rp-mono">{{ transaction.account.account_number }}</span></div>
+                <div class="rp-row"><span class="rp-rl">Account Type</span><span class="rp-rv">{{ transaction.account.get_account_type_display }}</span></div>
+                <div class="rp-row rp-row-last"><span class="rp-rl">Currency</span><span class="rp-rv">{{ transaction.currency }}</span></div>
+            </div>
+
+            <!-- Balance -->
+            <div class="rp-card rp-card-alt">
+                <div class="rp-card-hdr">Balance Summary</div>
+                <div class="rp-bal-row"><span class="rp-bl">Opening Balance</span><span class="rp-bv rp-mono">{{ transaction.balance_before|currency }}</span></div>
+                <div class="rp-bal-row rp-bal-txn">
+                    <span class="rp-bl">{{ transaction.get_transaction_type_display }}</span>
+                    <span class="rp-bv rp-mono {% if transaction.transaction_type == 'DEPOSIT' %}rp-pos{% else %}rp-neg{% endif %}">{% if transaction.transaction_type == 'DEPOSIT' %}+{% else %}&minus;{% endif %}{{ transaction.amount|currency }}</span>
+                </div>
+                {% if transaction.fee %}<div class="rp-bal-row"><span class="rp-bl">Fee</span><span class="rp-bv rp-mono rp-neg">&minus;{{ transaction.fee|currency }}</span></div>{% endif %}
+                <div class="rp-bal-sep"></div>
+                <div class="rp-bal-row rp-bal-total">
+                    <span class="rp-bl">Closing Balance</span>
+                    <span class="rp-bv rp-mono">{{ transaction.balance_after|currency }}</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right column -->
+        <div class="rp-col rp-col-r">
+
+            <!-- Transaction info -->
+            <div class="rp-card">
+                <div class="rp-card-hdr">Transaction Information</div>
+                <div class="rp-row"><span class="rp-rl">Date</span><span class="rp-rv">{{ transaction.initiated_at|date:"F d, Y" }}</span></div>
+                <div class="rp-row"><span class="rp-rl">Time</span><span class="rp-rv rp-mono">{{ transaction.initiated_at|date:"H:i:s" }} UTC</span></div>
+                <div class="rp-row"><span class="rp-rl">Type</span><span class="rp-rv">{{ transaction.get_transaction_type_display }}</span></div>
+                <div class="rp-row"><span class="rp-rl">Channel</span><span class="rp-rv">{{ transaction.get_channel_display }}</span></div>
+                <div class="rp-row"><span class="rp-rl">Status</span><span class="rp-rv rp-st rp-st-{{ transaction.status|lower }}">{{ transaction.get_status_display }}</span></div>
+                {% if transaction.reference_number %}<div class="rp-row"><span class="rp-rl">Reference</span><span class="rp-rv rp-mono">{{ transaction.reference_number }}</span></div>{% endif %}
+                {% if transaction.description %}<div class="rp-row rp-row-last"><span class="rp-rl">Description</span><span class="rp-rv">{{ transaction.description }}</span></div>{% endif %}
+            </div>
+
+            {% if transaction.transaction_type == 'TRANSFER' and transaction.beneficiary_name %}
+            <!-- Beneficiary -->
+            <div class="rp-card">
+                <div class="rp-card-hdr">Beneficiary Details</div>
+                <div class="rp-row"><span class="rp-rl">Name</span><span class="rp-rv">{{ transaction.beneficiary_name }}</span></div>
+                <div class="rp-row"><span class="rp-rl">Account No.</span><span class="rp-rv rp-mono">{{ transaction.beneficiary_account_number }}</span></div>
+                {% if transaction.beneficiary_bank %}<div class="rp-row rp-row-last"><span class="rp-rl">Bank</span><span class="rp-rv">{{ transaction.beneficiary_bank }}</span></div>{% endif %}
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- ════════════ VERIFICATION STRIP ════════════ -->
+    <div class="rp-verify">
+        <div class="rp-verify-l">
+            <div class="rp-seal">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+                <div class="rp-v-title">Digitally Verified &amp; Authorized</div>
+                <div class="rp-v-sub">Liberty Trust Equity Secure Banking System &nbsp;&bull;&nbsp; Auto-generated document</div>
+            </div>
+        </div>
+        <div class="rp-verify-r">
+            <div class="rp-v-clabel">VERIFICATION REFERENCE</div>
+            <div class="rp-v-code">{{ transaction.transaction_id }}</div>
+        </div>
+    </div>
+
+    <!-- ════════════ FOOTER ════════════ -->
+    <div class="rp-footer">
+        <div class="rp-ft-l">
+            <div class="rp-ft-bank">Liberty Trust Equity Bank</div>
+            <div class="rp-ft-contact">support@libertytrustequity.com</div>
+        </div>
+        <div class="rp-ft-c">
+            <div class="rp-ft-gen">Generated {{ transaction.initiated_at|date:"M d, Y \a\t H:i" }} UTC</div>
+            <div class="rp-ft-disc">This is a system-generated official record. No signature required.</div>
+        </div>
+        <div class="rp-ft-r">
+            <div class="rp-ft-conf">CONFIDENTIAL</div>
+            <div class="rp-ft-pg">Page 1 of 1</div>
+        </div>
+    </div>
+
+</div><!-- /rp -->
+</div><!-- /printReceipt -->
+
+
+<style>
+/* ── Hidden on screen ── */
+#printReceipt { display: none; }
+
+@media print {
+    @page { size: A4; margin: 0; }
+
+    body * { visibility: hidden !important; }
+    #printReceipt,
+    #printReceipt * { visibility: visible !important; }
+
+    #printReceipt {
+        display: block !important;
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: #fff;
+    }
+
+    /* ── Wrapper ── */
+    .rp {
+        width: 210mm;
+        min-height: 297mm;
+        background: #ffffff;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+        color: #111827;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ── Diagonal watermark ── */
+    .rp-wm {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-35deg);
+        font-size: 110px;
+        font-weight: 900;
+        color: rgba(16, 185, 129, 0.042);
+        letter-spacing: 18px;
+        pointer-events: none;
+        z-index: 0;
+        user-select: none;
+    }
+
+    /* ── Header ── */
+    .rp-hdr {
+        background: linear-gradient(135deg, #061a0e 0%, #0c2d1a 45%, #0f3d22 75%, #0a2516 100%);
+        padding: 24px 36px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+    }
+    .rp-hdr-brand {
+        display: flex;
+        align-items: flex-start;
+    }
+    .rp-logo-wrap {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 8px 16px 6px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18), 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .rp-logo-img {
+        height: 52px;
+        width: auto;
+        display: block;
+    }
+    .rp-bank-sub {
+        font-size: 7.5px;
+        color: #6b7280;
+        letter-spacing: 0.5px;
+        text-align: center;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+    .rp-hdr-meta { text-align: right; }
+    .rp-meta-label {
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 2.5px;
+        color: rgba(255, 255, 255, 0.38);
+        text-transform: uppercase;
+    }
+    .rp-meta-id {
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        font-weight: 700;
+        color: #34d399;
+        margin-top: 5px;
+        letter-spacing: 0.4px;
+    }
+    .rp-meta-date {
+        font-size: 10.5px;
+        color: rgba(255, 255, 255, 0.50);
+        margin-top: 3px;
+    }
+
+    /* ── Tri-color accent strip ── */
+    .rp-accent { display: flex; height: 5px; }
+    .rp-accent-dark  { flex: 1; background: #047857; }
+    .rp-accent-mid   { flex: 1; background: #10b981; }
+    .rp-accent-light { flex: 1; background: #6ee7b7; }
+
+    /* ── Hero amount ── */
+    .rp-hero {
+        padding: 30px 36px 24px;
+        background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+        text-align: center;
+        border-bottom: 1px solid #d1fae5;
+        position: relative;
+        z-index: 1;
+    }
+    .rp-hero-eyebrow {
+        font-size: 8.5px;
+        font-weight: 700;
+        letter-spacing: 3.5px;
+        color: #9ca3af;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+    .rp-hero-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 5px;
+        margin-bottom: 16px;
+    }
+    .rp-sign { font-size: 38px; font-weight: 700; line-height: 1; }
+    .rp-sign-pos { color: #059669; }
+    .rp-sign-neg { color: #dc2626; }
+    .rp-amount {
+        font-size: 56px;
+        font-weight: 900;
+        color: #111827;
+        line-height: 1;
+        letter-spacing: -1.5px;
+    }
+    .rp-ccy {
+        font-size: 19px;
+        font-weight: 600;
+        color: #9ca3af;
+        align-self: flex-end;
+        padding-bottom: 7px;
+    }
+    .rp-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 18px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+    }
+    .rp-pill-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+        flex-shrink: 0;
+    }
+    .rp-pill-completed  { background: #d1fae5; color: #065f46; }
+    .rp-pill-pending    { background: #fef3c7; color: #92400e; }
+    .rp-pill-failed     { background: #fee2e2; color: #991b1b; }
+    .rp-pill-cancelled  { background: #f3f4f6; color: #374151; }
+    .rp-pill-reversed   { background: #ede9fe; color: #5b21b6; }
+    .rp-pill-processing { background: #dbeafe; color: #1e40af; }
+
+    /* ── Divider label ── */
+    .rp-divider-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 36px;
+        background: #ffffff;
+        position: relative;
+        z-index: 1;
+    }
+    .rp-divider-line { flex: 1; height: 1px; background: #e5e7eb; }
+    .rp-divider-text {
+        font-size: 8.5px;
+        font-weight: 700;
+        letter-spacing: 2.2px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        white-space: nowrap;
+    }
+
+    /* ── Two-column grid ── */
+    .rp-grid {
+        display: flex;
+        gap: 0;
+        padding: 0 24px 18px;
+        position: relative;
+        z-index: 1;
+        background: #ffffff;
+    }
+    .rp-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .rp-col-l { padding-right: 10px; border-right: 1px solid #f3f4f6; }
+    .rp-col-r { padding-left: 10px; }
+
+    /* ── Cards ── */
+    .rp-card {
+        background: #fafafa;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .rp-card-alt {
+        background: #f0fdf4;
+        border-color: #d1fae5;
+    }
+    .rp-card-hdr {
+        background: #f3f4f6;
+        padding: 6px 12px;
+        font-size: 8.5px;
+        font-weight: 700;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .rp-card-alt .rp-card-hdr {
+        background: #dcfce7;
+        color: #065f46;
+        border-color: #bbf7d0;
+    }
+
+    /* ── Data rows ── */
+    .rp-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 5.5px 12px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .rp-row-last { border-bottom: none; }
+    .rp-card-alt .rp-row { border-bottom-color: #d1fae5; }
+    .rp-rl {
+        font-size: 9px;
+        color: #9ca3af;
+        font-weight: 500;
+        flex-shrink: 0;
+        min-width: 72px;
+    }
+    .rp-rv {
+        font-size: 10px;
+        color: #111827;
+        font-weight: 600;
+        text-align: right;
+    }
+    .rp-mono { font-family: 'Courier New', 'Lucida Console', monospace; letter-spacing: 0.3px; }
+
+    /* ── Status text ── */
+    .rp-st-completed { color: #065f46; font-weight: 700; }
+    .rp-st-pending   { color: #92400e; font-weight: 700; }
+    .rp-st-failed    { color: #991b1b; font-weight: 700; }
+    .rp-st-cancelled { color: #374151; font-weight: 700; }
+
+    /* ── Balance rows ── */
+    .rp-bal-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 5.5px 12px;
+        border-bottom: 1px solid #d1fae5;
+    }
+    .rp-bal-txn { background: rgba(16, 185, 129, 0.07); }
+    .rp-bal-sep { height: 1px; background: #10b981; margin: 2px 12px; }
+    .rp-bal-total { border-bottom: none; padding-top: 7px; }
+    .rp-bl {
+        font-size: 9px;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    .rp-bv {
+        font-size: 10px;
+        color: #111827;
+        font-weight: 600;
+        text-align: right;
+    }
+    .rp-bal-total .rp-bv { color: #047857; font-weight: 800; font-size: 11px; }
+    .rp-pos { color: #059669; }
+    .rp-neg { color: #dc2626; }
+
+    /* ── Verification strip ── */
+    .rp-verify {
+        background: linear-gradient(135deg, #061a0e, #0f3d22);
+        padding: 14px 36px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+        margin-top: 6px;
+    }
+    .rp-verify-l {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .rp-seal {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+    }
+    .rp-v-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    .rp-v-sub {
+        font-size: 8.5px;
+        color: rgba(255, 255, 255, 0.42);
+        margin-top: 2px;
+    }
+    .rp-verify-r { text-align: right; }
+    .rp-v-clabel {
+        font-size: 7px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.32);
+    }
+    .rp-v-code {
+        font-family: 'Courier New', monospace;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #34d399;
+        margin-top: 3px;
+        letter-spacing: 0.4px;
+    }
+
+    /* ── Footer ── */
+    .rp-footer {
+        padding: 13px 36px;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+    .rp-ft-l  { flex: 1; }
+    .rp-ft-c  { flex: 1.5; text-align: center; }
+    .rp-ft-r  { flex: 1; text-align: right; }
+    .rp-ft-bank { font-size: 10px; font-weight: 700; color: #111827; }
+    .rp-ft-contact { font-size: 8.5px; color: #6b7280; margin-top: 2px; }
+    .rp-ft-gen { font-size: 8.5px; color: #6b7280; }
+    .rp-ft-disc { font-size: 7.5px; color: #9ca3af; margin-top: 3px; font-style: italic; }
+    .rp-ft-conf {
+        font-size: 7.5px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #9ca3af;
+    }
+    .rp-ft-pg { font-size: 7.5px; color: #9ca3af; margin-top: 2px; }
+}
+</style>
+
+<script>
+function printReceipt() {
+    window.print();
+}
+</script>
+
 {% endblock %}

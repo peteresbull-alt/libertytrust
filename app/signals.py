@@ -143,6 +143,9 @@ def update_account_balance(sender, instance, **kwargs):
         account.balance = new_balance
         account.save(update_fields=['balance', 'updated_at'])
 
+        # Sync balance_after on the transaction record (queryset.update avoids re-triggering this signal)
+        sender.objects.filter(pk=instance.pk).update(balance_after=new_balance)
+
 
 @receiver(post_save, sender='app.Transaction')
 def create_transaction_notification(sender, instance, created, **kwargs):
