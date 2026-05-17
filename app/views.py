@@ -829,7 +829,7 @@ def deposit_view(request):
     }
 
     details_by_method = {}
-    for detail in DepositDetails.objects.filter(is_active=True):
+    for detail in DepositDetails.objects.filter(is_active=True, user=request.user):
         method = detail.payment_method
         if method not in details_by_method:
             details_by_method[method] = []
