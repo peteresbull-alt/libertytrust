@@ -31,7 +31,7 @@
                 <i class="fas fa-arrow-up text-green-300 text-xs sm:text-base"></i>
             </div>
             <p class="text-xs sm:text-sm text-blue-100 mb-1">Total Balance</p>
-            <h3 class="text-base sm:text-xl lg:text-3xl font-bold break-all">{{ total_balance|currency }}</h3>
+            <h3 class="text-base sm:text-xl lg:text-3xl font-bold break-all">{{ total_balance|currency:currency_symbol }}</h3>
             <p class="text-xs text-blue-200 mt-1 sm:mt-2">Across {{ total_accounts }} account{{ total_accounts|pluralize }}</p>
         </div>
 
@@ -43,7 +43,7 @@
                 </div>
             </div>
             <p class="text-xs sm:text-sm text-gray-600 mb-1">Recent Deposits</p>
-            <h3 class="text-base sm:text-xl lg:text-3xl font-bold text-gray-900 break-all">{{ recent_deposits|currency }}</h3>
+            <h3 class="text-base sm:text-xl lg:text-3xl font-bold text-gray-900 break-all">{{ recent_deposits|currency:currency_symbol }}</h3>
             <p class="text-xs text-gray-500 mt-1 sm:mt-2">Last 30 days</p>
         </div>
 
@@ -55,7 +55,7 @@
                 </div>
             </div>
             <p class="text-xs sm:text-sm text-gray-600 mb-1">Recent Withdrawals</p>
-            <h3 class="text-base sm:text-xl lg:text-3xl font-bold text-gray-900 break-all">{{ recent_withdrawals|currency }}</h3>
+            <h3 class="text-base sm:text-xl lg:text-3xl font-bold text-gray-900 break-all">{{ recent_withdrawals|currency:currency_symbol }}</h3>
             <p class="text-xs text-gray-500 mt-1 sm:mt-2">Last 30 days</p>
         </div>
 
@@ -158,7 +158,7 @@
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <p class="text-xs text-gray-500 mb-1">Account Balance</p>
-                                            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ account.balance|currency }}</p>
+                                            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ account.balance|currency:currency_symbol }}</p>
                                         </div>
                                         <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-600 transition-colors"></i>
                                     </div>
@@ -213,7 +213,7 @@
                                         {% if transaction.transaction_type == 'DEPOSIT' %}text-green-600
                                         {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}text-blue-600
                                         {% else %}text-gray-900{% endif %}">
-                                        {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency }}
+                                        {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
                                     </p>
                                     <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold
                                         {% if transaction.status == 'COMPLETED' %}bg-green-100 text-green-700

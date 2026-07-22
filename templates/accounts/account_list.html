@@ -55,7 +55,7 @@
                             {{ account.get_status_display }}
                         </span>
                     </div>
-                    <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-all">{{ account.balance|currency }}</p>
+                    <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-all">{{ account.balance|currency:currency_symbol }}</p>
                 </div>
 
                 <!-- Account Info Grid -->
@@ -130,7 +130,7 @@
             </div>
             <div class="text-center sm:text-left">
                 <p class="text-sm text-gray-600 mb-1">Combined Balance</p>
-                <p class="text-lg sm:text-2xl font-bold break-all text-green-600">{{ user.get_total_balance|currency }}</p>
+                <p class="text-lg sm:text-2xl font-bold break-all text-green-600">{{ user.get_total_balance|currency:currency_symbol }}</p>
             </div>
             <div class="text-center sm:text-left">
                 <p class="text-sm text-gray-600 mb-1">Active Accounts</p>

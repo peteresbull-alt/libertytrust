@@ -54,7 +54,7 @@
 
             <div class="lg:text-right">
                 <p class="text-sm text-blue-100 mb-2">Account Balance</p>
-                <p class="text-xl sm:text-3xl lg:text-5xl font-bold mb-4 break-all">{{ account.balance|currency }}</p>
+                <p class="text-xl sm:text-3xl lg:text-5xl font-bold mb-4 break-all">{{ account.balance|currency:currency_symbol }}</p>
                 <div class="flex lg:justify-end gap-3">
                     {% if account.status == 'ACTIVE' %}
                     <a href="{% url 'transfer' %}" class="inline-flex items-center px-6 py-2 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
@@ -118,19 +118,19 @@
             <div class="space-y-4">
                 <div class="flex justify-between py-3 border-b border-gray-200">
                     <span class="text-sm text-gray-600">Daily Withdrawal Limit</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ account.daily_withdrawal_limit|currency }}</span>
+                    <span class="text-sm font-semibold text-gray-900">{{ account.daily_withdrawal_limit|currency:currency_symbol }}</span>
                 </div>
                 <div class="flex justify-between py-3 border-b border-gray-200">
                     <span class="text-sm text-gray-600">Daily Transfer Limit</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ account.daily_transfer_limit|currency }}</span>
+                    <span class="text-sm font-semibold text-gray-900">{{ account.daily_transfer_limit|currency:currency_symbol }}</span>
                 </div>
                 <div class="flex justify-between py-3 border-b border-gray-200">
                     <span class="text-sm text-gray-600">Minimum Balance</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ account.minimum_balance|currency }}</span>
+                    <span class="text-sm font-semibold text-gray-900">{{ account.minimum_balance|currency:currency_symbol }}</span>
                 </div>
                 <div class="flex justify-between py-3 border-b border-gray-200">
                     <span class="text-sm text-gray-600">Overdraft Limit</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ account.overdraft_limit|currency }}</span>
+                    <span class="text-sm font-semibold text-gray-900">{{ account.overdraft_limit|currency:currency_symbol }}</span>
                 </div>
                 {% if account.account_type == 'SAVINGS' %}
                 <div class="flex justify-between py-3">
@@ -193,7 +193,7 @@
                             {% if transaction.transaction_type == 'DEPOSIT' %}text-green-600
                             {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}text-orange-600
                             {% else %}text-gray-900{% endif %}">
-                            {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency }}
+                            {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
                         </p>
                         <span class="inline-block px-2 py-0.5 text-xs font-semibold rounded-full
                             {% if transaction.status == 'COMPLETED' %}bg-green-100 text-green-700

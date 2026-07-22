@@ -185,7 +185,9 @@ class DepositSerializer(serializers.Serializer):
         if value <= 0:
             raise serializers.ValidationError("Deposit amount must be greater than zero.")
         if value > 1000000:
-            raise serializers.ValidationError("Deposit amount cannot exceed $1,000,000.")
+            request = self.context.get('request')
+            symbol = request.user.currency_symbol if request else '$'
+            raise serializers.ValidationError(f"Deposit amount cannot exceed {symbol}1,000,000.")
         return value
 
 
@@ -457,14 +459,15 @@ class LoanApplicationSerializer(serializers.ModelSerializer):
             )
         
         # Validate loan amount
+        symbol = user.currency_symbol
         if data['principal_amount'] < 1000:
             raise serializers.ValidationError(
-                "Minimum loan amount is $1,000."
+                f"Minimum loan amount is {symbol}1,000."
             )
-        
+
         if data['principal_amount'] > 1000000:
             raise serializers.ValidationError(
-                "Maximum loan amount is $1,000,000."
+                f"Maximum loan amount is {symbol}1,000,000."
             )
         
         # Validate loan term

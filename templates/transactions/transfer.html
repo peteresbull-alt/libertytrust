@@ -227,16 +227,16 @@
                         <div id="feeCalculator" class="bg-gray-50 rounded-lg p-4 border border-gray-200 hidden">
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-600">Transfer Amount:</span>
-                                <span class="font-semibold text-gray-900" id="displayAmount">$0.00</span>
+                                <span class="font-semibold text-gray-900" id="displayAmount">{{ currency_symbol }}0.00</span>
                             </div>
                             <div class="flex justify-between items-center text-sm mt-2">
-                                <span class="text-gray-600">Transfer Fee (0.5%, max $10):</span>
-                                <span class="font-semibold text-gray-900" id="displayFee">$0.00</span>
+                                <span class="text-gray-600">Transfer Fee (0.5%, max {{ currency_symbol }}10):</span>
+                                <span class="font-semibold text-gray-900" id="displayFee">{{ currency_symbol }}0.00</span>
                             </div>
                             <div class="border-t border-gray-300 mt-3 pt-3">
                                 <div class="flex justify-between items-center">
                                     <span class="font-semibold text-gray-900">Total Debit:</span>
-                                    <span class="font-bold text-blue-600 text-lg" id="displayTotal">$0.00</span>
+                                    <span class="font-bold text-blue-600 text-lg" id="displayTotal">{{ currency_symbol }}0.00</span>
                                 </div>
                             </div>
                         </div>
@@ -324,7 +324,7 @@
                         <ul class="text-xs text-blue-800 space-y-1.5">
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-blue-600 mr-2 mt-0.5"></i>
-                                Transfer fee: 0.5% (max $10.00)
+                                Transfer fee: 0.5% (max {{ currency_symbol }}10.00)
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-blue-600 mr-2 mt-0.5"></i>
@@ -370,6 +370,7 @@
 </div>
 
 <script>
+const currencySymbol = "{{ currency_symbol }}";
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const methodSaved = document.getElementById('method_saved');
@@ -496,9 +497,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const fee = Math.min(amount * 0.005, 10.00);
             const total = amount + fee;
             
-            document.getElementById('displayAmount').textContent = '$' + amount.toFixed(2);
-            document.getElementById('displayFee').textContent = '$' + fee.toFixed(2);
-            document.getElementById('displayTotal').textContent = '$' + total.toFixed(2);
+            document.getElementById('displayAmount').textContent = currencySymbol + amount.toFixed(2);
+            document.getElementById('displayFee').textContent = currencySymbol + fee.toFixed(2);
+            document.getElementById('displayTotal').textContent = currencySymbol + total.toFixed(2);
         } else {
             feeCalculator.classList.add('hidden');
         }

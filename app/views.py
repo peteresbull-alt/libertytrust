@@ -452,7 +452,7 @@ def account_apply_view(request):
             messages.success(
                 request,
                 f'Your {account.get_account_type_display()} application has been submitted successfully! '
-                f'Please pay the activation fee of ${account.activation_fee} to activate your account.'
+                f'Please pay the activation fee of {request.user.currency_symbol}{account.activation_fee} to activate your account.'
             )
             return redirect('account_activate', account_number=account.account_number)
         else:
@@ -597,7 +597,7 @@ def card_apply_view(request):
             messages.success(
                 request,
                 f'Your {card.get_card_type_display()} application has been submitted successfully! '
-                f'Please pay the activation fee of ${card.activation_fee} to activate your card.'
+                f'Please pay the activation fee of {request.user.currency_symbol}{card.activation_fee} to activate your card.'
             )
             return redirect('card_activate', card_id=card.id)
         else:

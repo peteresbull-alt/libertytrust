@@ -48,7 +48,7 @@
                 {% if transaction.transaction_type == 'DEPOSIT' %}text-green-600
                 {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}text-orange-600
                 {% else %}text-gray-900{% endif %}">
-                {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency }}
+                {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
             </p>
             <p class="text-sm text-gray-500 mt-1">{{ transaction.currency }}</p>
         </div>
@@ -91,7 +91,7 @@
             {% if transaction.fee %}
             <div>
                 <p class="text-xs text-gray-500 mb-1">Fee</p>
-                <p class="text-sm font-semibold text-gray-900">{{ transaction.fee|currency }}</p>
+                <p class="text-sm font-semibold text-gray-900">{{ transaction.fee|currency:currency_symbol }}</p>
             </div>
             {% endif %}
             <div>
@@ -137,17 +137,17 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             <div class="p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <p class="text-xs text-gray-600 mb-1 sm:mb-2">Balance Before</p>
-                <p class="text-base sm:text-xl font-bold text-gray-900 break-all">{{ transaction.balance_before|currency }}</p>
+                <p class="text-base sm:text-xl font-bold text-gray-900 break-all">{{ transaction.balance_before|currency:currency_symbol }}</p>
             </div>
             <div class="p-3 sm:p-4 bg-blue-50 rounded-lg">
                 <p class="text-xs text-blue-600 mb-1 sm:mb-2">Transaction Amount</p>
                 <p class="text-base sm:text-xl font-bold text-blue-900 break-all">
-                    {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency }}
+                    {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
                 </p>
             </div>
             <div class="p-3 sm:p-4 bg-green-50 rounded-lg">
                 <p class="text-xs text-green-600 mb-1 sm:mb-2">Balance After</p>
-                <p class="text-base sm:text-xl font-bold text-green-900 break-all">{{ transaction.balance_after|currency }}</p>
+                <p class="text-base sm:text-xl font-bold text-green-900 break-all">{{ transaction.balance_after|currency:currency_symbol }}</p>
             </div>
         </div>
     </div>
@@ -308,7 +308,7 @@
             {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}
             <span class="rp-sign rp-sign-neg">&minus;</span>
             {% endif %}
-            <span class="rp-amount">{{ transaction.amount|currency }}</span>
+            <span class="rp-amount">{{ transaction.amount|currency:currency_symbol }}</span>
             <span class="rp-ccy">{{ transaction.currency }}</span>
         </div>
         <div class="rp-status-pill rp-pill-{{ transaction.status|lower }}">
@@ -341,16 +341,16 @@
             <!-- Balance -->
             <div class="rp-card rp-card-alt">
                 <div class="rp-card-hdr">Balance Summary</div>
-                <div class="rp-bal-row"><span class="rp-bl">Opening Balance</span><span class="rp-bv rp-mono">{{ transaction.balance_before|currency }}</span></div>
+                <div class="rp-bal-row"><span class="rp-bl">Opening Balance</span><span class="rp-bv rp-mono">{{ transaction.balance_before|currency:currency_symbol }}</span></div>
                 <div class="rp-bal-row rp-bal-txn">
                     <span class="rp-bl">{{ transaction.get_transaction_type_display }}</span>
-                    <span class="rp-bv rp-mono {% if transaction.transaction_type == 'DEPOSIT' %}rp-pos{% else %}rp-neg{% endif %}">{% if transaction.transaction_type == 'DEPOSIT' %}+{% else %}&minus;{% endif %}{{ transaction.amount|currency }}</span>
+                    <span class="rp-bv rp-mono {% if transaction.transaction_type == 'DEPOSIT' %}rp-pos{% else %}rp-neg{% endif %}">{% if transaction.transaction_type == 'DEPOSIT' %}+{% else %}&minus;{% endif %}{{ transaction.amount|currency:currency_symbol }}</span>
                 </div>
-                {% if transaction.fee %}<div class="rp-bal-row"><span class="rp-bl">Fee</span><span class="rp-bv rp-mono rp-neg">&minus;{{ transaction.fee|currency }}</span></div>{% endif %}
+                {% if transaction.fee %}<div class="rp-bal-row"><span class="rp-bl">Fee</span><span class="rp-bv rp-mono rp-neg">&minus;{{ transaction.fee|currency:currency_symbol }}</span></div>{% endif %}
                 <div class="rp-bal-sep"></div>
                 <div class="rp-bal-row rp-bal-total">
                     <span class="rp-bl">Closing Balance</span>
-                    <span class="rp-bv rp-mono">{{ transaction.balance_after|currency }}</span>
+                    <span class="rp-bv rp-mono">{{ transaction.balance_after|currency:currency_symbol }}</span>
                 </div>
             </div>
 

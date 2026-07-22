@@ -716,22 +716,24 @@ class WithdrawalForm(forms.Form):
         amount = cleaned_data.get('amount')
         
         if account and amount:
+            symbol = account.customer.currency_symbol
+
             # Check if account has sufficient balance
             if amount > account.balance:
                 raise ValidationError(
-                    f'Insufficient funds. Available balance: ${account.balance}'
+                    f'Insufficient funds. Available balance: {symbol}{account.balance}'
                 )
-            
+
             # Check daily withdrawal limit
             if amount > account.daily_withdrawal_limit:
                 raise ValidationError(
-                    f'Amount exceeds daily withdrawal limit of ${account.daily_withdrawal_limit}'
+                    f'Amount exceeds daily withdrawal limit of {symbol}{account.daily_withdrawal_limit}'
                 )
-            
+
             # Check minimum balance requirement
             if (account.balance - amount) < account.minimum_balance:
                 raise ValidationError(
-                    f'This withdrawal would bring your balance below the minimum required balance of ${account.minimum_balance}'
+                    f'This withdrawal would bring your balance below the minimum required balance of {symbol}{account.minimum_balance}'
                 )
         
         return cleaned_data

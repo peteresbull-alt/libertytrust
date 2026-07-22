@@ -105,7 +105,7 @@
                             {% if transaction.transaction_type == 'DEPOSIT' %}text-green-600
                             {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}text-orange-600
                             {% else %}text-gray-900{% endif %}">
-                            {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %}{{ transaction.amount|currency }}
+                            {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %}{{ transaction.amount|currency:currency_symbol }}
                         </p>
                         <span class="px-2 py-0.5 inline-flex text-xs font-semibold rounded-full
                             {% if transaction.status == 'COMPLETED' %}bg-green-100 text-green-800
@@ -170,7 +170,7 @@
                                 {% if transaction.transaction_type == 'DEPOSIT' %}text-green-600
                                 {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}text-orange-600
                                 {% else %}text-gray-900{% endif %}">
-                                {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency }}
+                                {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
                             </div>
                             <div class="text-xs text-gray-500">{{ transaction.currency }}</div>
                         </td>

@@ -267,7 +267,7 @@ def deposit_view(request):
             "reference_number": "REF123" (optional)
         }
     """
-    serializer = DepositSerializer(data=request.data)
+    serializer = DepositSerializer(data=request.data, context={'request': request})
     
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -343,7 +343,7 @@ def withdrawal_view(request):
             "description": "ATM withdrawal" (optional)
         }
     """
-    serializer = WithdrawalSerializer(data=request.data)
+    serializer = WithdrawalSerializer(data=request.data, context={'request': request})
     
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -394,7 +394,7 @@ def withdrawal_view(request):
     if amount > account.daily_withdrawal_limit:
         return Response(
             {
-                'error': f'Amount exceeds daily withdrawal limit of ${account.daily_withdrawal_limit}',
+                'error': f'Amount exceeds daily withdrawal limit of {user.currency_symbol}{account.daily_withdrawal_limit}',
             },
             status=status.HTTP_400_BAD_REQUEST
         )
@@ -404,7 +404,7 @@ def withdrawal_view(request):
     if new_balance < account.minimum_balance:
         return Response(
             {
-                'error': f'Withdrawal would bring balance below minimum of ${account.minimum_balance}',
+                'error': f'Withdrawal would bring balance below minimum of {user.currency_symbol}{account.minimum_balance}',
             },
             status=status.HTTP_400_BAD_REQUEST
         )
@@ -512,7 +512,7 @@ def transfer_view(request):
     if amount > from_account.daily_transfer_limit:
         return Response(
             {
-                'error': f'Amount exceeds daily transfer limit of ${from_account.daily_transfer_limit}',
+                'error': f'Amount exceeds daily transfer limit of {user.currency_symbol}{from_account.daily_transfer_limit}',
             },
             status=status.HTTP_400_BAD_REQUEST
         )
@@ -521,7 +521,7 @@ def transfer_view(request):
     if amount > user.daily_transfer_limit:
         return Response(
             {
-                'error': f'Amount exceeds your daily transfer limit of ${user.daily_transfer_limit}',
+                'error': f'Amount exceeds your daily transfer limit of {user.currency_symbol}{user.daily_transfer_limit}',
             },
             status=status.HTTP_400_BAD_REQUEST
         )

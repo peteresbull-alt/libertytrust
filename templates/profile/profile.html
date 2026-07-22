@@ -91,7 +91,7 @@
                     <i class="fas fa-wallet text-emerald-600 text-lg"></i>
                 </div>
             </div>
-            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ user.get_total_balance|currency }}</p>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ user.get_total_balance|currency:currency_symbol }}</p>
         </div>
         <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:border-primary-200 transition-all duration-300">
             <div class="flex items-center justify-between mb-2">
@@ -173,7 +173,7 @@
             <div><p class="text-xs text-gray-500 mb-1">Status</p><p class="text-sm font-semibold text-gray-900">{{ user.employment_status }}</p></div>
             {% if user.employer_name %}<div><p class="text-xs text-gray-500 mb-1">Employer</p><p class="text-sm font-semibold text-gray-900">{{ user.employer_name }}</p></div>{% endif %}
             {% if user.job_title %}<div><p class="text-xs text-gray-500 mb-1">Title</p><p class="text-sm font-semibold text-gray-900">{{ user.job_title }}</p></div>{% endif %}
-            {% if user.annual_income %}<div><p class="text-xs text-gray-500 mb-1">Income</p><p class="text-sm font-semibold text-gray-900">{{ user.annual_income|currency }}</p></div>{% endif %}
+            {% if user.annual_income %}<div><p class="text-xs text-gray-500 mb-1">Income</p><p class="text-sm font-semibold text-gray-900">{{ user.annual_income|currency:currency_symbol }}</p></div>{% endif %}
         </div>
         {% else %}
         <p class="text-sm text-gray-500 text-center py-4">No employment info</p>

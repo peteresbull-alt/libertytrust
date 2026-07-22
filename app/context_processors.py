@@ -19,3 +19,14 @@ def notifications_processor(request):
         'unread_notifications_count': 0
     }
 
+
+def currency_processor(request):
+    """
+    Add the current user's currency symbol to all templates.
+    Falls back to '$' for anonymous users.
+    """
+    if request.user.is_authenticated:
+        return {'currency_symbol': request.user.currency_symbol}
+
+    return {'currency_symbol': '$'}
+

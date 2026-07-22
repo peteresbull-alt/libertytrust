@@ -41,6 +41,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('GBP', 'British Pound (£)'),
         # ('INR', 'Indian Rupee (₹)'),
     ]
+
+    CURRENCY_SYMBOLS = {
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£',
+    }
     
     PREFERRED_ID_TYPE = [
         ("Driver Licence", 'Driver Licence'),
@@ -255,6 +261,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         middle = f" {self.middle_name}" if self.middle_name else ""
         return f"{self.first_name}{middle} {self.last_name}".strip().title()
     
+    @property
+    def currency_symbol(self):
+        """Currency symbol matching the user's preferred_currency, defaults to $"""
+        return self.CURRENCY_SYMBOLS.get(self.preferred_currency, '$')
+
     @property
     def get_total_balance(self):
         """Calculate total balance across all ACTIVE accounts"""
