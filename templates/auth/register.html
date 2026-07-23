@@ -138,6 +138,26 @@
       flex-shrink: 0;
     }
 
+    /* Password visibility toggle */
+    .password-field-wrapper { position: relative; }
+    .password-field-wrapper input[type="password"],
+    .password-field-wrapper input[type="text"] { padding-right: 2.75rem; }
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 0.25rem;
+      color: rgba(249,250,251,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .password-toggle-btn:hover { color: rgba(249,250,251,0.75); }
+
     .btn-primary {
       width: 100%;
       padding: 0.875rem 1.5rem;
@@ -344,12 +364,22 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="form-label"><i class="fas fa-lock text-emerald-400 mr-1.5"></i>Password</label>
-              {{ form.password1 }}
+              <div class="password-field-wrapper">
+                {{ form.password1 }}
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('{{ form.password1.id_for_label }}', this)" aria-label="Show password" tabindex="-1">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
               {% if form.password1.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.password1.errors.0 }}</p>{% endif %}
             </div>
             <div>
               <label class="form-label">Confirm Password</label>
-              {{ form.password2 }}
+              <div class="password-field-wrapper">
+                {{ form.password2 }}
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('{{ form.password2.id_for_label }}', this)" aria-label="Show password" tabindex="-1">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
               {% if form.password2.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.password2.errors.0 }}</p>{% endif %}
             </div>
           </div>
@@ -455,5 +485,17 @@
 
   <!-- Alpine.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <script>
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const icon = btn.querySelector('i');
+      const showing = input.type === 'password';
+      input.type = showing ? 'text' : 'password';
+      icon.classList.toggle('fa-eye', !showing);
+      icon.classList.toggle('fa-eye-slash', showing);
+      btn.setAttribute('aria-label', showing ? 'Hide password' : 'Show password');
+    }
+  </script>
 </body>
 </html>

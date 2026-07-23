@@ -71,13 +71,13 @@ class UserRegistrationForm(UserCreationForm):
     gender = forms.ChoiceField(
         choices=CustomUser.GENDER_CHOICES,
         widget=forms.Select(attrs={
-            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 text-gray-900 bg-white'
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200'
         })
     )
-    
+
     address = forms.CharField(
         widget=forms.Textarea(attrs={
-            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 text-gray-900 resize-none',
+            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 resize-none',
             'rows': 3,
             'placeholder': 'Street Address'
         })
