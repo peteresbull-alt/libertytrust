@@ -798,6 +798,7 @@ def deposit_view(request):
                 balance_after=balance_before,
                 description=f'{payment_method.replace("_", " ").title()} Deposit',
                 reference_number=reference_number,
+                receipt=receipt,
                 ip_address=get_client_ip(request),
                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
             )
