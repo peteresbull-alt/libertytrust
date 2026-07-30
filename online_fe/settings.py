@@ -328,6 +328,13 @@ X_FRAME_OPTIONS = 'DENY'
 
 APP_NAME = 'Online FE'
 FRONTEND_URL = 'http://localhost:3000'
+SITE_URL = config('SITE_URL', default='https://www.libertytrustequity.com')
+
+# ============================================
+# RESEND (TRANSACTIONAL EMAIL)
+# ============================================
+RESEND_KEY = config('RESEND_KEY', default='')
+RESEND_FROM_EMAIL = config('RESEND_FROM_EMAIL', default='Liberty Trust Equity <no-reply@libertytrustequity.com>')
 
 
 

@@ -187,6 +187,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     # Transfer Authorization Code (TAC)
     tac = models.CharField(max_length=10, blank=True, null=True)
     tac_generated_at = models.DateTimeField(blank=True, null=True)
+    can_receive_tac_mail = models.BooleanField(
+        default=False,
+        help_text='If enabled, the user is emailed their Transfer Authorization Code whenever it is generated.'
+    )
 
     # Security
     failed_login_attempts = models.IntegerField(default=0)

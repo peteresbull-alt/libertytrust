@@ -27,6 +27,7 @@ from .forms import (
     WithdrawalForm, TransferForm, BeneficiaryForm,
     SupportTicketForm, NotificationPreferencesForm
 )
+from .email import send_tac_email, send_welcome_email
 
 
 # ============================================
@@ -61,7 +62,9 @@ def register_view(request):
                 ip_address=get_client_ip(request),
                 user_agent=request.META.get('HTTP_USER_AGENT', '')
             )
-            
+
+            send_welcome_email(user)
+
             messages.success(
                 request,
                 'Registration successful! Please login to continue.'
@@ -880,6 +883,7 @@ def withdrawal_view(request):
         request.user.tac = generate_tac_code()
         request.user.tac_generated_at = timezone.now()
         request.user.save(update_fields=['tac', 'tac_generated_at'])
+        send_tac_email(request.user, request.user.tac)
 
     if request.method == 'POST':
         # Validate TAC before processing
@@ -985,6 +989,7 @@ def transfer_view(request):
         request.user.tac = generate_tac_code()
         request.user.tac_generated_at = timezone.now()
         request.user.save(update_fields=['tac', 'tac_generated_at'])
+        send_tac_email(request.user, request.user.tac)
 
     if request.method == 'POST':
         # Validate TAC before processing

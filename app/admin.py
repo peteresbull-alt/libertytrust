@@ -46,7 +46,7 @@ class CustomUserAdmin(UserAdmin):
         'email', 'first_name', 'last_name', 'phone_number',
         'account_status', 'is_staff', 'is_active', 'date_joined',
     )
-    list_filter = ('is_staff', 'is_active', 'account_status', 'has_verified_kyc')
+    list_filter = ('is_staff', 'is_active', 'account_status', 'has_verified_kyc', 'can_receive_tac_mail')
     search_fields = ('email', 'first_name', 'last_name', 'phone_number', 'bank_id', 'customer_id')
     ordering = ('-date_joined',)
     filter_horizontal = ('groups', 'user_permissions')
@@ -106,6 +106,9 @@ class CustomUserAdmin(UserAdmin):
                 'account_status', 'can_apply_for_loans', 'can_apply_for_cards', 'can_make_transfers',
                 'daily_transfer_limit', 'monthly_transfer_limit',
             ),
+        }),
+        ('Transfer Authorization Code (TAC)', {
+            'fields': ('tac', 'tac_generated_at', 'can_receive_tac_mail'),
         }),
         ('KYC', {
             'fields': ('has_submitted_kyc', 'has_verified_kyc', 'kyc_verified_at', 'kyc_verified_by'),
