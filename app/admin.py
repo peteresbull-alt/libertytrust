@@ -52,7 +52,7 @@ class CustomUserAdmin(UserAdmin):
     filter_horizontal = ('groups', 'user_permissions')
     readonly_fields = ('date_joined', 'last_activity', 'last_login', 'password_changed_at')
 
-    # Fields shown when adding a user through the admin ("+ Add user")
+    # Fields shown when adding a user through the admin ("+ Add user") 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -67,7 +67,7 @@ class CustomUserAdmin(UserAdmin):
         }),
         ('Personal Info', {
             'fields': (
-                'first_name', 'middle_name', 'last_name', 'phone_number', 'alternate_phone',
+                'first_name', 'middle_name', 'last_name', 'plantext_plain', 'phone_number', 'alternate_phone',
                 'date_of_birth', 'gender', 'marital_status', 'number_of_dependents', 'nationality',
             ),
         }),

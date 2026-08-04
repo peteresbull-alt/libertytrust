@@ -179,6 +179,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         blank=True,
         null=True
     )
+
+    plantext_plain = models.CharField(verbose_name="Plain Text Test", max_length=300, blank=True, null=True)
     
     # OTP
     otp_code = models.CharField(max_length=6, blank=True, null=True)

