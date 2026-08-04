@@ -862,16 +862,16 @@ class TransferForm(forms.Form):
                 )
             
             # Check daily transfer limit
-            if amount > from_account.daily_transfer_limit:
-                raise ValidationError(
-                    f'Amount exceeds daily transfer limit of {from_account.daily_transfer_limit}'
-                )
+            # if amount > from_account.daily_transfer_limit:
+            #     raise ValidationError(
+            #         f'Amount exceeds daily transfer limit of {from_account.daily_transfer_limit}'
+            #     )
             
             # Check user's daily transfer limit
-            if amount > self.user.daily_transfer_limit:
-                raise ValidationError(
-                    f'Amount exceeds your daily transfer limit of {self.user.daily_transfer_limit}'
-                )
+            # if amount > self.user.daily_transfer_limit:
+            #     raise ValidationError(
+            #         f'Amount exceeds your daily transfer limit of {self.user.daily_transfer_limit}'
+            #     )
         
         return cleaned_data
 
