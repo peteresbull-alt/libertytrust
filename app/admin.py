@@ -147,7 +147,25 @@ admin.site.register(LoanRepayment)
 admin.site.register(Notification)
 admin.site.register(SupportTicket)
 admin.site.register(AuditLog)
-admin.site.register(Transaction)
+
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = (
+        'transaction_id', 'user_email', 'transaction_type', 'amount', 'currency',
+        'status', 'channel', 'initiated_at',
+    )
+    list_filter = ('transaction_type', 'status', 'channel', 'currency')
+    search_fields = (
+        'transaction_id', 'user__email', 'account__account_number',
+        'beneficiary_name', 'reference_number',
+    )
+    ordering = ('-initiated_at',)
+    date_hierarchy = 'initiated_at'
+
+    @admin.display(description='User Email', ordering='user__email')
+    def user_email(self, obj):
+        return obj.user.email
 
 
 @admin.register(DepositDetails)
