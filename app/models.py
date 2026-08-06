@@ -202,7 +202,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     # Metadata
     date_joined = models.DateTimeField(default=timezone.now)
-    last_activity = models.DateTimeField(auto_now=True)
+    last_activity = models.DateTimeField(default=timezone.now, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     email_verified = models.BooleanField(default=False)
