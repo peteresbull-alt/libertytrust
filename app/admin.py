@@ -50,7 +50,7 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('email', 'first_name', 'last_name', 'phone_number', 'bank_id', 'customer_id')
     ordering = ('-date_joined',)
     filter_horizontal = ('groups', 'user_permissions')
-    readonly_fields = ('date_joined', 'last_activity', 'last_login', 'password_changed_at')
+    readonly_fields = ('date_joined', 'last_activity', 'password_changed_at')
 
     # Fields shown when adding a user through the admin ("+ Add user") 
     add_fieldsets = (
