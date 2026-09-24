@@ -790,7 +790,6 @@ def deposit_view(request):
                 error = 'You need at least one active account to make a deposit. Please contact support.'
 
         if not error and account and amount:
-            balance_before = account.balance
             transaction = Transaction.objects.create(
                 transaction_id=generate_transaction_id(),
                 user=request.user,
@@ -800,8 +799,6 @@ def deposit_view(request):
                 currency=account.currency,
                 status='PENDING',
                 channel='WEB',
-                balance_before=balance_before,
-                balance_after=balance_before,
                 description=f'{payment_method.replace("_", " ").title()} Deposit',
                 reference_number=reference_number,
                 receipt=receipt,
@@ -906,9 +903,6 @@ def withdrawal_view(request):
             withdrawal_method = form.cleaned_data['withdrawal_method']
             description = form.cleaned_data.get('description')
             
-            # Store balance before transaction
-            balance_before = account.balance
-            
             # Create transaction (status PENDING - balance not affected yet)
             transaction = Transaction.objects.create(
                 transaction_id=generate_transaction_id(),
@@ -919,8 +913,6 @@ def withdrawal_view(request):
                 currency=account.currency,
                 status='PENDING',
                 channel='WEB',
-                balance_before=balance_before,
-                balance_after=balance_before,  # Will be updated when completed
                 description=description or f'{withdrawal_method} Withdrawal',
                 ip_address=get_client_ip(request),
                 user_agent=request.META.get('HTTP_USER_AGENT', '')
@@ -1022,9 +1014,6 @@ def transfer_view(request):
             fee = min(amount * Decimal('0.005'), Decimal('10.00'))
             total_amount = amount + fee
             
-            # Store balance before transaction
-            balance_before = from_account.balance
-            
             # Create transaction (status PENDING - balance not affected yet)
             transaction = Transaction.objects.create(
                 transaction_id=generate_transaction_id(),
@@ -1036,8 +1025,6 @@ def transfer_view(request):
                 fee=fee,
                 status='PENDING',
                 channel='WEB',
-                balance_before=balance_before,
-                balance_after=balance_before,  # Will be updated when completed
                 beneficiary_account_number=beneficiary_account_number,
                 beneficiary_name=beneficiary_name,
                 beneficiary_bank=beneficiary_bank,

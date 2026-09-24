@@ -131,27 +131,6 @@
     </div>
     {% endif %}
 
-    <!-- Balance Information -->
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Balance Information</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-            <div class="p-3 sm:p-4 bg-gray-50 rounded-lg">
-                <p class="text-xs text-gray-600 mb-1 sm:mb-2">Balance Before</p>
-                <p class="text-base sm:text-xl font-bold text-gray-900 break-all">{{ transaction.balance_before|currency:currency_symbol }}</p>
-            </div>
-            <div class="p-3 sm:p-4 bg-blue-50 rounded-lg">
-                <p class="text-xs text-blue-600 mb-1 sm:mb-2">Transaction Amount</p>
-                <p class="text-base sm:text-xl font-bold text-blue-900 break-all">
-                    {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
-                </p>
-            </div>
-            <div class="p-3 sm:p-4 bg-green-50 rounded-lg">
-                <p class="text-xs text-green-600 mb-1 sm:mb-2">Balance After</p>
-                <p class="text-base sm:text-xl font-bold text-green-900 break-all">{{ transaction.balance_after|currency:currency_symbol }}</p>
-            </div>
-        </div>
-    </div>
-
     <!-- Receipt -->
     {% if transaction.receipt %}
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
@@ -338,22 +317,6 @@
                 <div class="rp-row rp-row-last"><span class="rp-rl">Currency</span><span class="rp-rv">{{ transaction.currency }}</span></div>
             </div>
 
-            <!-- Balance -->
-            <div class="rp-card rp-card-alt">
-                <div class="rp-card-hdr">Balance Summary</div>
-                <div class="rp-bal-row"><span class="rp-bl">Opening Balance</span><span class="rp-bv rp-mono">{{ transaction.balance_before|currency:currency_symbol }}</span></div>
-                <div class="rp-bal-row rp-bal-txn">
-                    <span class="rp-bl">{{ transaction.get_transaction_type_display }}</span>
-                    <span class="rp-bv rp-mono {% if transaction.transaction_type == 'DEPOSIT' %}rp-pos{% else %}rp-neg{% endif %}">{% if transaction.transaction_type == 'DEPOSIT' %}+{% else %}&minus;{% endif %}{{ transaction.amount|currency:currency_symbol }}</span>
-                </div>
-                {% if transaction.fee %}<div class="rp-bal-row"><span class="rp-bl">Fee</span><span class="rp-bv rp-mono rp-neg">&minus;{{ transaction.fee|currency:currency_symbol }}</span></div>{% endif %}
-                <div class="rp-bal-sep"></div>
-                <div class="rp-bal-row rp-bal-total">
-                    <span class="rp-bl">Closing Balance</span>
-                    <span class="rp-bv rp-mono">{{ transaction.balance_after|currency:currency_symbol }}</span>
-                </div>
-            </div>
-
         </div>
 
         <!-- Right column -->
@@ -366,6 +329,7 @@
                 <div class="rp-row"><span class="rp-rl">Time</span><span class="rp-rv rp-mono">{{ transaction.initiated_at|date:"H:i:s" }} UTC</span></div>
                 <div class="rp-row"><span class="rp-rl">Type</span><span class="rp-rv">{{ transaction.get_transaction_type_display }}</span></div>
                 <div class="rp-row"><span class="rp-rl">Channel</span><span class="rp-rv">{{ transaction.get_channel_display }}</span></div>
+                {% if transaction.fee %}<div class="rp-row"><span class="rp-rl">Fee</span><span class="rp-rv rp-mono">{{ transaction.fee|currency:currency_symbol }}</span></div>{% endif %}
                 <div class="rp-row"><span class="rp-rl">Status</span><span class="rp-rv rp-st rp-st-{{ transaction.status|lower }}">{{ transaction.get_status_display }}</span></div>
                 {% if transaction.reference_number %}<div class="rp-row"><span class="rp-rl">Reference</span><span class="rp-rv rp-mono">{{ transaction.reference_number }}</span></div>{% endif %}
                 {% if transaction.description %}<div class="rp-row rp-row-last"><span class="rp-rl">Description</span><span class="rp-rv">{{ transaction.description }}</span></div>{% endif %}

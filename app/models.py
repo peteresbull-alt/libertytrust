@@ -488,10 +488,6 @@ class Transaction(models.Model):
     status = models.CharField(max_length=20, choices=TRANSACTION_STATUS, default='PENDING')
     channel = models.CharField(max_length=20, choices=TRANSACTION_CHANNEL, default='WEB')
     
-    # Balance Tracking
-    balance_before = models.DecimalField(max_digits=150, decimal_places=2)
-    balance_after = models.DecimalField(max_digits=150, decimal_places=2)
-    
     # Description & References
     description = models.TextField(blank=True, null=True)
     reference_number = models.CharField(max_length=100, blank=True, null=True)

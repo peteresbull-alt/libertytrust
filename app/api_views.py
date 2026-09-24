@@ -307,8 +307,6 @@ def deposit_view(request):
         currency=account.currency,
         status='COMPLETED',
         channel='WEB',
-        balance_before=balance_before,
-        balance_after=balance_after,
         description=data.get('description', f'Deposit to {account.account_type} account'),
         reference_number=data.get('reference_number', ''),
         completed_at=timezone.now(),
@@ -421,8 +419,6 @@ def withdrawal_view(request):
         currency=account.currency,
         status='COMPLETED',
         channel='WEB',
-        balance_before=balance_before,
-        balance_after=balance_after,
         description=data.get('description', f'Withdrawal from {account.account_type} account'),
         completed_at=timezone.now(),
         ip_address=get_client_ip(request)
@@ -543,8 +539,6 @@ def transfer_view(request):
         beneficiary_account_number=data['beneficiary_account_number'],
         beneficiary_name=data['beneficiary_name'],
         beneficiary_bank=data['beneficiary_bank'],
-        balance_before=balance_before,
-        balance_after=balance_after,
         description=data.get('description', f'Transfer to {data["beneficiary_name"]}'),
         completed_at=timezone.now(),
         ip_address=get_client_ip(request)

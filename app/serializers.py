@@ -165,7 +165,7 @@ class TransactionDetailSerializer(serializers.ModelSerializer):
             'id', 'transaction_id', 'user_email', 'account_number',
             'transaction_type', 'amount', 'currency', 'fee',
             'beneficiary_account_number', 'beneficiary_name', 'beneficiary_bank',
-            'status', 'channel', 'balance_before', 'balance_after',
+            'status', 'channel',
             'description', 'reference_number', 'external_reference',
             'initiated_at', 'completed_at', 'failed_at', 'failure_reason',
             'ip_address', 'receipt'

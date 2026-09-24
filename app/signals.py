@@ -3,6 +3,7 @@ Signal handlers for the banking application
 """
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.db.models import F
 from django.utils import timezone
 from decimal import Decimal
 import random
@@ -122,29 +123,48 @@ def generate_transaction_id(sender, instance, created, **kwargs):
         sender.objects.filter(pk=instance.pk).update(transaction_id=transaction_id)
 
 
+@receiver(pre_save, sender='app.Transaction')
+def remember_previous_transaction_status(sender, instance, **kwargs):
+    """
+    Remember the status stored in the DB so post_save can tell whether
+    this save is the one that moves the transaction to COMPLETED.
+    """
+    instance._previous_status = (
+        sender.objects.filter(pk=instance.pk).values_list('status', flat=True).first()
+        if instance.pk else None
+    )
+
+    # Stamp the completion time when the transaction is marked COMPLETED (e.g. from admin)
+    if instance.status == 'COMPLETED' and not instance.completed_at:
+        instance.completed_at = timezone.now()
+
+
 @receiver(post_save, sender='app.Transaction')
 def update_account_balance(sender, instance, **kwargs):
     """
-    Update account balance when transaction is completed
+    Credit/debit the account when a transaction is completed
     """
-    # Only process if transaction is completed and not already processed
-    if instance.status == 'COMPLETED' and instance.account:
-        account = instance.account
-        
-        # Calculate new balance based on transaction type
-        if instance.transaction_type in ['DEPOSIT', 'INTEREST', 'REFUND', 'LOAN_DISBURSEMENT']:
-            new_balance = account.balance + instance.amount
-        elif instance.transaction_type in ['WITHDRAWAL', 'TRANSFER', 'PAYMENT', 'FEE', 'LOAN_REPAYMENT']:
-            new_balance = account.balance - (instance.amount + instance.fee)
-        else:
-            new_balance = account.balance
-        
-        # Update account balance
-        account.balance = new_balance
-        account.save(update_fields=['balance', 'updated_at'])
+    # Only process the save that transitions the transaction to COMPLETED,
+    # so re-saving (e.g. editing in admin) never re-applies it
+    if instance.status != 'COMPLETED' or not instance.account_id:
+        return
+    if getattr(instance, '_previous_status', None) == 'COMPLETED':
+        return
 
-        # Sync balance_after on the transaction record (queryset.update avoids re-triggering this signal)
-        sender.objects.filter(pk=instance.pk).update(balance_after=new_balance)
+    # Calculate balance change based on transaction type
+    if instance.transaction_type in ['DEPOSIT', 'INTEREST', 'REFUND', 'LOAN_DISBURSEMENT']:
+        change = instance.amount
+    elif instance.transaction_type in ['WITHDRAWAL', 'TRANSFER', 'PAYMENT', 'FEE', 'LOAN_REPAYMENT']:
+        change = -(instance.amount + (instance.fee or 0))
+    else:
+        return
+
+    # Apply the change in the DB (F expression) so a stale in-memory account can't clobber it
+    from app.models import Account  # Import here to avoid circular import
+    Account.objects.filter(pk=instance.account_id).update(
+        balance=F('balance') + change,
+        updated_at=timezone.now(),
+    )
 
 
 @receiver(post_save, sender='app.Transaction')
